@@ -32,8 +32,13 @@ class DepenseViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         groupe = serializer.validated_data['groupe']
+        payeur = serializer.validated_data['payeur']
+        membres_ids = set(groupe.membres.values_list('pk', flat=True))
 
-        if not groupe.membres.filter(pk=self.request.user.pk).exists():
+        if self.request.user.pk not in membres_ids:
             raise PermissionDenied("Vous n'êtes pas membre de ce groupe.")
+
+        if payeur.pk not in membres_ids:
+            raise PermissionDenied("Le payeur désigné n'est pas membre de ce groupe.")
 
         serializer.save()

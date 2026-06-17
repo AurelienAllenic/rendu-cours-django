@@ -33,9 +33,9 @@ class DepenseSerializer(serializers.ModelSerializer):
         model = Depense
         fields = [
             'id', 'groupe', 'titre', 'montant',
-            'payeur', 'payeur_username', 'date', 'parts',
+            'payeur', 'payeur_username', 'date_creation', 'parts',
         ]
-        read_only_fields = ['id', 'date']
+        read_only_fields = ['id', 'date_creation']
 
     def validate(self, data):
         parts = data.get('parts', [])

@@ -12,10 +12,10 @@ class PartInline(admin.TabularInline):
 @admin.register(Depense)
 class DepenseAdmin(admin.ModelAdmin):
     inlines = [PartInline]
-    list_display = ['titre', 'groupe', 'montant', 'payeur', 'date']
+    list_display = ['titre', 'groupe', 'montant', 'payeur', 'date_creation']
     list_filter = ['groupe']
     search_fields = ['titre', 'payeur__username']
-    readonly_fields = ['date']
+    readonly_fields = ['date_creation']
 
 
 @admin.register(Groupe)
