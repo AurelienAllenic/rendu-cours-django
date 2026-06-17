@@ -6,265 +6,399 @@
     <title>Tricount — Connexion</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;0,9..144,900;1,9..144,400;1,9..144,700;1,9..144,900&family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+        :root {
+            --bg:       #09090d;
+            --s1:       #111218;
+            --s2:       #181a22;
+            --border:   #22242e;
+            --border2:  #2d3040;
+            --accent:   #b5f23d;
+            --accent-s: rgba(181,242,61,0.08);
+            --text:     #eceef0;
+            --mid:      #686c80;
+            --dim:      #3a3d50;
+            --neg:      #ff4d6d;
+            --neg-s:    rgba(255,77,109,0.1);
+        }
+
+        html, body { height: 100%; }
+
         body {
-            font-family: 'Inter', system-ui, sans-serif;
-            min-height: 100vh;
-            background: linear-gradient(145deg, #edf1fb 0%, #e8eeff 55%, #ede8ff 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow: hidden;
         }
 
-        /* Decorative blobs */
-        body::before, body::after {
-            content: '';
-            position: fixed;
-            border-radius: 50%;
-            filter: blur(80px);
-            opacity: 0.35;
-            pointer-events: none;
-            z-index: 0;
-        }
+        /* ─── Grain overlay ─── */
         body::before {
-            width: 500px; height: 500px;
-            background: #a78bfa;
-            top: -120px; left: -100px;
-        }
-        body::after {
-            width: 400px; height: 400px;
-            background: #6366f1;
-            bottom: -100px; right: -80px;
+            content: '';
+            position: fixed; inset: 0; z-index: 9999; pointer-events: none;
+            opacity: 0.045;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-size: 160px;
         }
 
-        .card {
+        /* ─── Layout ─── */
+        .shell {
+            display: grid;
+            grid-template-columns: 46% 54%;
+            height: 100vh;
+        }
+
+        /* ─── Brand panel ─── */
+        .brand {
+            background: var(--s1);
+            border-right: 1px solid var(--border);
+            padding: 48px;
+            display: flex;
+            flex-direction: column;
             position: relative;
-            z-index: 1;
-            background: rgba(255,255,255,0.92);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: 28px;
-            padding: 48px 44px;
-            width: 100%;
-            max-width: 440px;
-            box-shadow: 0 8px 60px rgba(91,106,245,0.14), 0 1px 4px rgba(0,0,0,0.04);
-            border: 1px solid rgba(255,255,255,0.6);
+            overflow: hidden;
         }
 
-        /* Logo */
+        /* Decorative large glyph */
+        .brand::after {
+            content: '€';
+            position: absolute;
+            right: -40px; bottom: -60px;
+            font-family: 'Fraunces', serif;
+            font-size: clamp(220px, 25vw, 340px);
+            font-weight: 900;
+            color: var(--accent);
+            opacity: 0.04;
+            line-height: 1;
+            pointer-events: none;
+            user-select: none;
+        }
+
         .logo {
             display: flex;
             align-items: center;
-            gap: 14px;
-            margin-bottom: 40px;
+            gap: 11px;
+            position: relative;
+            z-index: 1;
         }
-        .logo-icon {
-            width: 50px; height: 50px;
-            border-radius: 15px;
-            background: linear-gradient(135deg, #5b6af5 0%, #8b5cf6 100%);
+        .logo-badge {
+            background: var(--accent);
+            color: var(--bg);
+            font-family: 'Outfit', sans-serif;
+            font-size: 12.5px;
+            font-weight: 700;
+            padding: 5px 10px;
+            border-radius: 8px;
+            letter-spacing: -0.3px;
+        }
+        .logo-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text);
+            opacity: 0.9;
+        }
+
+        .brand-quote {
+            margin: auto 0;
+            font-family: 'Fraunces', serif;
+            font-size: clamp(26px, 2.8vw, 42px);
+            font-weight: 700;
+            line-height: 1.18;
+            letter-spacing: -0.8px;
+            position: relative;
+            z-index: 1;
+            max-width: 380px;
+        }
+        .brand-quote em {
+            font-style: italic;
+            color: var(--accent);
+        }
+
+        .brand-stats {
+            display: flex;
+            gap: 36px;
+            position: relative;
+            z-index: 1;
+            padding-top: 32px;
+            border-top: 1px solid var(--border);
+        }
+        .stat-num {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 21px;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        .stat-lbl {
+            display: block;
+            font-size: 10.5px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.9px;
+            color: var(--dim);
+            margin-top: 4px;
+        }
+
+        /* ─── Form panel ─── */
+        .form-side {
+            background: var(--bg);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-size: 18px;
-            font-weight: 800;
-            letter-spacing: -1px;
-            box-shadow: 0 4px 16px rgba(91,106,245,0.35);
+            padding: 48px 52px;
+            overflow-y: auto;
         }
-        .logo-name { font-size: 22px; font-weight: 700; color: #0f172a; letter-spacing: -0.5px; }
-        .logo-tagline { font-size: 12.5px; color: #94a3b8; margin-top: 1px; }
+
+        .form-box {
+            width: 100%;
+            max-width: 360px;
+            animation: riseIn 0.55s cubic-bezier(0.16,1,0.3,1) both;
+        }
+
+        @keyframes riseIn {
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .mobile-logo { display: none; }
+
+        .form-title {
+            font-family: 'Fraunces', serif;
+            font-size: 38px;
+            font-weight: 700;
+            letter-spacing: -1px;
+            color: var(--text);
+            line-height: 1.05;
+            margin-bottom: 6px;
+        }
+        .form-sub {
+            font-size: 14px;
+            color: var(--mid);
+            margin-bottom: 32px;
+        }
 
         /* Tabs */
         .tabs {
             display: flex;
-            background: #f1f5f9;
-            border-radius: 13px;
-            padding: 4px;
-            margin-bottom: 30px;
-            gap: 4px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 28px;
+            gap: 2px;
         }
-        .tab-btn {
+        .tab {
             flex: 1;
-            padding: 10px 16px;
+            padding: 10px 0;
+            background: none;
             border: none;
-            background: transparent;
-            border-radius: 10px;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+            font-family: 'Outfit', sans-serif;
             font-size: 13.5px;
             font-weight: 500;
+            color: var(--dim);
             cursor: pointer;
-            color: #64748b;
-            transition: all 0.2s ease;
-            font-family: 'Inter', sans-serif;
+            transition: color 0.15s, border-color 0.15s;
+            text-align: center;
+            letter-spacing: 0.1px;
         }
-        .tab-btn.active {
-            background: white;
-            color: #5b6af5;
-            font-weight: 600;
-            box-shadow: 0 1px 10px rgba(91,106,245,0.15);
-        }
+        .tab:hover:not(.active) { color: var(--mid); }
+        .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
 
-        /* Form panels */
+        /* Alert */
+        .alert {
+            display: flex; align-items: center; gap: 10px;
+            background: var(--neg-s);
+            border: 1px solid rgba(255,77,109,0.22);
+            border-radius: 10px;
+            padding: 11px 15px;
+            color: var(--neg);
+            font-size: 13.5px;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+        .alert svg { flex-shrink: 0; }
+
+        /* Panels */
         .panel { display: none; }
         .panel.active { display: block; }
 
-        /* Error */
-        .error-box {
-            background: #fff1f2;
-            border: 1px solid #fecdd3;
-            border-radius: 11px;
-            padding: 11px 15px;
-            color: #e11d48;
-            font-size: 13.5px;
-            margin-bottom: 18px;
-            display: flex;
-            align-items: center;
-            gap: 9px;
-            line-height: 1.4;
-        }
-        .error-box svg { flex-shrink: 0; }
-
-        /* Form */
-        .form-group { margin-bottom: 16px; }
-        .form-group label {
+        /* Fields */
+        .field { margin-bottom: 15px; }
+        .field label {
             display: block;
-            font-size: 12.5px;
+            font-size: 10.5px;
             font-weight: 600;
-            color: #475569;
-            margin-bottom: 7px;
-            letter-spacing: 0.2px;
             text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--mid);
+            margin-bottom: 8px;
         }
-        .optional { text-transform: none; font-weight: 400; color: #cbd5e1; letter-spacing: 0; }
+        .optional { text-transform: none; font-weight: 400; letter-spacing: 0; font-size: 11px; color: var(--dim); }
 
-        input[type="text"],
-        input[type="password"],
-        input[type="email"] {
+        input[type=text], input[type=password], input[type=email] {
             width: 100%;
+            background: var(--s1);
+            border: 1px solid var(--border);
+            border-radius: 10px;
             padding: 13px 16px;
-            border: 1.5px solid #e2e8f0;
-            border-radius: 13px;
             font-size: 14.5px;
-            font-family: 'Inter', sans-serif;
-            color: #0f172a;
-            background: #fafbff;
-            transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+            font-family: 'Outfit', sans-serif;
+            color: var(--text);
             outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
         }
-        input::placeholder { color: #c4cdd8; }
+        input::placeholder { color: var(--dim); }
+        input:hover { border-color: var(--border2); }
         input:focus {
-            border-color: #5b6af5;
-            box-shadow: 0 0 0 4px rgba(91,106,245,0.1);
-            background: #fff;
+            border-color: var(--accent);
+            background: #111318;
+            box-shadow: 0 0 0 3px var(--accent-s);
         }
 
-        .btn-primary {
-            width: 100%;
+        .btn-submit {
+            width: 100%; margin-top: 10px;
             padding: 14px;
-            margin-top: 6px;
-            background: linear-gradient(135deg, #5b6af5 0%, #7c3aed 100%);
-            color: white;
+            background: var(--accent);
+            color: #0a0b0e;
             border: none;
-            border-radius: 14px;
+            border-radius: 11px;
             font-size: 15px;
-            font-weight: 600;
+            font-weight: 700;
+            font-family: 'Outfit', sans-serif;
             cursor: pointer;
-            font-family: 'Inter', sans-serif;
             letter-spacing: -0.2px;
-            transition: opacity 0.15s, transform 0.1s;
-            box-shadow: 0 4px 20px rgba(91,106,245,0.3);
+            transition: opacity 0.12s, transform 0.1s;
         }
-        .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 6px 24px rgba(91,106,245,0.38); }
-        .btn-primary:active { transform: scale(0.99); opacity: 1; }
+        .btn-submit:hover { opacity: 0.88; transform: translateY(-1px); }
+        .btn-submit:active { opacity: 1; transform: none; }
 
-        .hint {
-            font-size: 12.5px;
-            color: #b0bec5;
-            text-align: center;
-            margin-top: 22px;
-            line-height: 1.5;
+        /* ─── Responsive ─── */
+        @media (max-width: 820px) {
+            html, body { overflow: auto; }
+            body { overflow-x: hidden; }
+            .shell { grid-template-columns: 1fr; height: auto; min-height: 100vh; overflow: auto; }
+            .brand { display: none; }
+            .form-side { padding: 48px 24px; align-items: flex-start; min-height: 100vh; }
+            .form-box { max-width: 100%; }
+            .mobile-logo {
+                display: flex; align-items: center; gap: 11px;
+                margin-bottom: 36px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .form-side { padding: 32px 20px; }
+            .form-title { font-size: 30px; }
         }
     </style>
 </head>
 <body>
-<div class="card">
-    <div class="logo">
-        <div class="logo-icon">T₂</div>
-        <div>
-            <div class="logo-name">Tricount</div>
-            <div class="logo-tagline">Partagez vos dépenses entre amis</div>
+<div class="shell">
+
+    <!-- Brand panel -->
+    <div class="brand">
+        <div class="logo">
+            <span class="logo-badge">T₂</span>
+            <span class="logo-name">Tricount</span>
+        </div>
+        <div class="brand-quote">
+            Partagez vos dépenses,<br>
+            <em>sans les<br>complications.</em>
+        </div>
+        <div class="brand-stats">
+            <div>
+                <span class="stat-num">3,4K</span>
+                <span class="stat-lbl">utilisateurs</span>
+            </div>
+            <div>
+                <span class="stat-num">142K€</span>
+                <span class="stat-lbl">remboursements calculés</span>
+            </div>
+            <div>
+                <span class="stat-num">∞</span>
+                <span class="stat-lbl">conflits évités</span>
+            </div>
         </div>
     </div>
 
-    <div class="tabs">
-        <button class="tab-btn {% if active_tab == 'login' %}active{% endif %}" onclick="switchTab('login')">Se connecter</button>
-        <button class="tab-btn {% if active_tab == 'register' %}active{% endif %}" onclick="switchTab('register')">S'inscrire</button>
-    </div>
+    <!-- Form panel -->
+    <div class="form-side">
+        <div class="form-box">
 
-    {% if error %}
-    <div class="error-box">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-        </svg>
-        {{ error }}
-    </div>
-    {% endif %}
+            <div class="mobile-logo">
+                <span class="logo-badge">T₂</span>
+                <span class="logo-name">Tricount</span>
+            </div>
 
-    <!-- Connexion -->
-    <div id="panel-login" class="panel {% if active_tab == 'login' %}active{% endif %}">
-        <form method="post">
-            {% csrf_token %}
-            <input type="hidden" name="action" value="login">
-            <div class="form-group">
-                <label>Nom d'utilisateur</label>
-                <input type="text" name="username" placeholder="votre_pseudo" autocomplete="username" autofocus required>
-            </div>
-            <div class="form-group">
-                <label>Mot de passe</label>
-                <input type="password" name="password" placeholder="••••••••" autocomplete="current-password" required>
-            </div>
-            <button type="submit" class="btn-primary">Connexion →</button>
-        </form>
-    </div>
+            <h1 class="form-title">Bienvenue.</h1>
+            <p class="form-sub">Connectez-vous ou créez un compte pour commencer.</p>
 
-    <!-- Inscription -->
-    <div id="panel-register" class="panel {% if active_tab == 'register' %}active{% endif %}">
-        <form method="post">
-            {% csrf_token %}
-            <input type="hidden" name="action" value="register">
-            <div class="form-group">
-                <label>Nom d'utilisateur</label>
-                <input type="text" name="username" placeholder="votre_pseudo" autocomplete="username" required>
+            <div class="tabs">
+                <button class="tab {% if active_tab == 'login' %}active{% endif %}" onclick="switchTab('login')">Se connecter</button>
+                <button class="tab {% if active_tab == 'register' %}active{% endif %}" onclick="switchTab('register')">S'inscrire</button>
             </div>
-            <div class="form-group">
-                <label>Email <span class="optional">(optionnel)</span></label>
-                <input type="email" name="email" placeholder="vous@email.com" autocomplete="email">
-            </div>
-            <div class="form-group">
-                <label>Mot de passe</label>
-                <input type="password" name="password" placeholder="Min. 8 caractères" autocomplete="new-password" required>
-            </div>
-            <div class="form-group">
-                <label>Confirmer le mot de passe</label>
-                <input type="password" name="password2" placeholder="••••••••" autocomplete="new-password" required>
-            </div>
-            <button type="submit" class="btn-primary">Créer mon compte →</button>
-        </form>
-    </div>
 
-    <div class="hint">Vos données sont privées et sécurisées.</div>
+            {% if error %}
+            <div class="alert">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                {{ error }}
+            </div>
+            {% endif %}
+
+            <div id="panel-login" class="panel {% if active_tab == 'login' %}active{% endif %}">
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="login">
+                    <div class="field">
+                        <label>Nom d'utilisateur</label>
+                        <input type="text" name="username" placeholder="votre_pseudo" autocomplete="username" autofocus>
+                    </div>
+                    <div class="field">
+                        <label>Mot de passe</label>
+                        <input type="password" name="password" placeholder="••••••••" autocomplete="current-password">
+                    </div>
+                    <button type="submit" class="btn-submit">Connexion →</button>
+                </form>
+            </div>
+
+            <div id="panel-register" class="panel {% if active_tab == 'register' %}active{% endif %}">
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="register">
+                    <div class="field">
+                        <label>Nom d'utilisateur</label>
+                        <input type="text" name="username" placeholder="votre_pseudo" autocomplete="username">
+                    </div>
+                    <div class="field">
+                        <label>Email <span class="optional">— optionnel</span></label>
+                        <input type="email" name="email" placeholder="vous@email.com" autocomplete="email">
+                    </div>
+                    <div class="field">
+                        <label>Mot de passe <span class="optional">— min. 8 caractères</span></label>
+                        <input type="password" name="password" placeholder="••••••••" autocomplete="new-password">
+                    </div>
+                    <div class="field">
+                        <label>Confirmer le mot de passe</label>
+                        <input type="password" name="password2" placeholder="••••••••" autocomplete="new-password">
+                    </div>
+                    <button type="submit" class="btn-submit">Créer mon compte →</button>
+                </form>
+            </div>
+
+        </div>
+    </div>
 </div>
 
 <script>
-function switchTab(tab) {
-    document.querySelectorAll('.tab-btn').forEach((b, i) => {
-        b.classList.toggle('active', (tab === 'login' && i === 0) || (tab === 'register' && i === 1));
-    });
+function switchTab(t) {
+    document.querySelectorAll('.tab').forEach((b,i) =>
+        b.classList.toggle('active', (t==='login'&&i===0)||(t==='register'&&i===1))
+    );
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    document.getElementById('panel-' + tab).classList.add('active');
+    document.getElementById('panel-'+t).classList.add('active');
 }
 </script>
 </body>

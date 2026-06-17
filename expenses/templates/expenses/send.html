@@ -6,286 +6,365 @@
     <title>Tricount — Nouvelle dépense</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,700;1,9..144,400;1,9..144,700&family=JetBrains+Mono:wght@400;600;700;800&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
         :root {
-            --bg: #edf1f9;
-            --white: #ffffff;
-            --primary: #5b6af5;
-            --primary-pale: rgba(91,106,245,0.08);
-            --primary-border: rgba(91,106,245,0.25);
-            --text: #0f172a;
-            --mid: #475569;
-            --light: #94a3b8;
-            --border: #e8edf6;
-            --shadow: 0 2px 20px rgba(15,23,42,0.06);
-            --r: 20px;
-            --green: #10b981;
-            --green-pale: rgba(16,185,129,0.1);
-            --red: #ef4444;
-            --red-pale: rgba(239,68,68,0.1);
+            --bg:       #09090d;
+            --s1:       #111218;
+            --s2:       #181a22;
+            --s3:       #1f2130;
+            --border:   #22242e;
+            --border2:  #2d3040;
+            --accent:   #b5f23d;
+            --accent-s: rgba(181,242,61,0.08);
+            --accent-b: rgba(181,242,61,0.2);
+            --text:     #eceef0;
+            --mid:      #686c80;
+            --dim:      #3a3d50;
+            --pos:      #b5f23d;
+            --pos-s:    rgba(181,242,61,0.1);
+            --neg:      #ff4d6d;
+            --neg-s:    rgba(255,77,109,0.1);
         }
+
         html, body { height: 100%; overflow: hidden; }
-        body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); display: flex; }
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+        }
+
+        /* ─── Grain ─── */
+        body::before {
+            content: '';
+            position: fixed; inset: 0; z-index: 9999; pointer-events: none; opacity: 0.04;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-size: 160px;
+        }
 
         /* ─── Sidebar ─── */
         .sidebar {
-            width: 72px; min-height: 100vh;
-            background: var(--white);
-            border-right: 1px solid var(--border);
+            width: 68px; min-height: 100vh;
+            background: var(--s1); border-right: 1px solid var(--border);
             display: flex; flex-direction: column; align-items: center;
-            padding: 20px 0; flex-shrink: 0; z-index: 10;
+            padding: 20px 0; flex-shrink: 0; z-index: 50;
         }
-        .sidebar-logo {
-            width: 42px; height: 42px; border-radius: 13px;
-            background: linear-gradient(135deg, #5b6af5 0%, #8b5cf6 100%);
+        .sb-logo {
+            background: var(--accent); color: var(--bg);
+            font-family: 'Outfit', sans-serif;
+            font-size: 11.5px; font-weight: 700;
+            padding: 5px 8px; border-radius: 8px;
+            letter-spacing: -0.3px; margin-bottom: 32px;
+        }
+        .sb-nav { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; }
+        .sb-btn {
+            width: 42px; height: 42px; border-radius: 12px;
             display: flex; align-items: center; justify-content: center;
-            color: white; font-size: 14px; font-weight: 800;
-            margin-bottom: 32px;
-            box-shadow: 0 4px 14px rgba(91,106,245,0.3);
+            color: var(--dim); text-decoration: none;
+            background: transparent; border: none; cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+            position: relative;
         }
-        .sidebar-nav { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; }
-        .nav-btn {
-            width: 44px; height: 44px; border-radius: 13px;
+        .sb-btn:hover { background: var(--s2); color: var(--mid); }
+        .sb-btn.active { background: var(--accent-s); color: var(--accent); }
+        .sb-btn.active::before {
+            content: ''; position: absolute; left: 0; top: 25%; bottom: 25%;
+            width: 2px; background: var(--accent);
+            border-radius: 0 2px 2px 0; margin-left: -1px;
+        }
+        .sb-btn svg { width: 18px; height: 18px; }
+        .sb-bottom { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .sb-avatar {
+            width: 34px; height: 34px; border-radius: 50%;
+            border: 2px solid var(--border2); background: var(--s2);
             display: flex; align-items: center; justify-content: center;
-            color: var(--light); text-decoration: none;
-            transition: all 0.18s; cursor: pointer;
-            background: transparent; border: none;
-        }
-        .nav-btn:hover { background: var(--primary-pale); color: var(--primary); }
-        .nav-btn.active { background: var(--primary-pale); color: var(--primary); }
-        .nav-btn svg { width: 20px; height: 20px; }
-        .sidebar-bottom { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-        .nav-avatar {
-            width: 36px; height: 36px; border-radius: 50%;
-            background: linear-gradient(135deg, #5b6af5, #8b5cf6);
-            color: white; display: flex; align-items: center; justify-content: center;
-            font-size: 13px; font-weight: 700; margin-top: 4px;
+            font-size: 12px; font-weight: 700; color: var(--accent);
+            margin-top: 6px;
         }
 
         /* ─── Main ─── */
-        .main {
-            flex: 1; overflow-y: auto;
-            display: flex; flex-direction: column;
-            padding: 28px; gap: 22px; min-width: 0;
+        .main { flex: 1; overflow-y: auto; display: flex; flex-direction: column; min-width: 0; }
+
+        /* ─── Header ─── */
+        .header {
+            padding: 24px 28px 0;
+            flex-shrink: 0;
+            animation: fadeUp 0.45s cubic-bezier(0.16,1,0.3,1) 0.04s both;
+        }
+        .header-eyebrow {
+            font-size: 10.5px; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 1.2px;
+            color: var(--dim); margin-bottom: 4px;
+        }
+        .header-title {
+            font-family: 'Fraunces', serif;
+            font-size: 26px; font-weight: 700;
+            letter-spacing: -0.5px; color: var(--text);
         }
 
-        .header { display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
-        .header-title { font-size: 22px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; }
-        .header-sub { font-size: 13px; color: var(--light); margin-top: 2px; }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(18px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
 
         /* ─── Grid ─── */
         .grid {
             display: grid;
             grid-template-columns: 1.1fr 0.9fr;
-            gap: 20px;
+            gap: 18px;
+            padding: 20px 28px 28px;
             flex: 1;
+            min-height: 0;
+            animation: fadeUp 0.45s cubic-bezier(0.16,1,0.3,1) 0.1s both;
         }
 
         /* ─── Card ─── */
         .card {
-            background: var(--white);
-            border-radius: var(--r);
-            padding: 28px;
-            box-shadow: var(--shadow);
-            display: flex;
-            flex-direction: column;
-            gap: 22px;
+            background: var(--s1);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
             overflow-y: auto;
         }
 
-        .card-title { font-size: 15px; font-weight: 700; color: var(--text); }
-        .section-title { font-size: 11.5px; font-weight: 700; color: var(--light); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 10px; }
-
-        /* ─── Form fields ─── */
-        .field { display: flex; flex-direction: column; gap: 7px; }
-        .field label { font-size: 12px; font-weight: 600; color: var(--mid); text-transform: uppercase; letter-spacing: 0.3px; }
-
-        input[type="text"], input[type="number"], select.field-input {
-            padding: 13px 16px;
-            border: 1.5px solid var(--border);
-            border-radius: 13px;
-            font-size: 14.5px;
-            font-family: 'Inter', sans-serif;
-            color: var(--text);
-            background: #fafbff;
-            outline: none;
-            transition: border-color 0.15s, box-shadow 0.15s;
-            width: 100%;
-            -webkit-appearance: none;
-        }
-        input::placeholder { color: #c4cdd8; }
-        input:focus, select.field-input:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 4px rgba(91,106,245,0.1);
-            background: #fff;
+        .section-label {
+            font-size: 10px; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 1.3px;
+            color: var(--dim); margin-bottom: 12px;
         }
 
-        /* Amount input */
-        .amount-wrapper { position: relative; }
-        .amount-wrapper .currency {
-            position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
-            font-size: 18px; font-weight: 700; color: var(--light);
+        /* ─── Fields ─── */
+        .field { margin-bottom: 14px; }
+        .field label {
+            display: block; font-size: 10.5px; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.9px;
+            color: var(--mid); margin-bottom: 7px;
         }
-        .amount-wrapper input { padding-left: 34px; font-size: 22px; font-weight: 700; color: var(--text); }
+        .field-opt { text-transform: none; font-weight: 400; letter-spacing: 0; font-size: 11px; color: var(--dim); }
 
-        /* Split toggle */
-        .split-toggle {
-            display: flex;
-            background: #f1f5f9;
-            border-radius: 11px;
-            padding: 3px;
-            gap: 3px;
+        input[type=text], input[type=number] {
+            width: 100%; background: var(--s2); border: 1px solid var(--border2);
+            border-radius: 10px; padding: 12px 16px;
+            font-size: 14.5px; font-family: 'Outfit', sans-serif;
+            color: var(--text); outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
         }
-        .split-btn {
-            flex: 1; padding: 8px 12px;
-            border: none; border-radius: 8px;
-            font-size: 13px; font-weight: 500;
-            cursor: pointer; font-family: 'Inter', sans-serif;
-            color: var(--mid); background: transparent;
-            transition: all 0.15s;
-        }
-        .split-btn.active {
-            background: white; color: var(--primary); font-weight: 600;
-            box-shadow: 0 1px 8px rgba(91,106,245,0.13);
-        }
+        input::placeholder { color: var(--dim); }
+        input:hover { border-color: var(--border2); }
+        input:focus { border-color: var(--accent); background: var(--s1); box-shadow: 0 0 0 3px var(--accent-s); }
+        input[readonly] { opacity: 0.55; cursor: default; }
 
-        /* Participants */
-        .participant-item {
-            display: flex; align-items: center; gap: 12px;
-            padding: 10px 14px;
-            border: 1.5px solid var(--border);
-            border-radius: 13px;
+        select.fi {
+            width: 100%; background: var(--s2); border: 1px solid var(--border2);
+            border-radius: 10px; padding: 12px 38px 12px 16px;
+            font-size: 14.5px; font-family: 'Outfit', sans-serif;
+            color: var(--text); outline: none; appearance: none; -webkit-appearance: none;
             cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%233a3d50' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: right 14px center;
+            transition: border-color 0.15s;
+        }
+        select.fi:focus { border-color: var(--accent); outline: none; }
+        select.fi option { background: var(--s2); }
+
+        /* Amount field */
+        .amt-wrap { position: relative; }
+        .amt-sym {
+            position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 16px; font-weight: 600; color: var(--dim);
+            pointer-events: none;
+        }
+        .amt-wrap input { padding-left: 34px; font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; }
+
+        /* ─── Split toggle ─── */
+        .split-row {
+            display: flex; align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .split-toggle {
+            display: flex; gap: 2px;
+            background: var(--s2); border: 1px solid var(--border2);
+            border-radius: 9px; padding: 3px;
+        }
+        .sp-btn {
+            padding: 6px 13px; border: none; border-radius: 7px;
+            font-size: 12.5px; font-weight: 500;
+            font-family: 'Outfit', sans-serif; cursor: pointer;
+            color: var(--dim); background: transparent;
             transition: all 0.15s;
-            background: #fafbff;
         }
-        .participant-item.selected {
-            border-color: var(--primary-border);
-            background: var(--primary-pale);
+        .sp-btn.active { background: var(--s3); color: var(--text); font-weight: 600; }
+
+        /* ─── Participants ─── */
+        .p-item {
+            display: flex; align-items: center; gap: 11px;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 11px; margin-bottom: 8px;
+            cursor: pointer; background: var(--s2);
+            transition: border-color 0.15s, background 0.15s;
         }
-        .p-avatar {
-            width: 34px; height: 34px; border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 14px; font-weight: 700; color: white; flex-shrink: 0;
+        .p-item.on {
+            border-color: var(--accent-b);
+            background: var(--accent-s);
         }
-        .p-name { flex: 1; font-size: 14px; font-weight: 500; color: var(--text); }
+        .p-item.on .p-check {
+            background: var(--accent); border-color: var(--accent);
+        }
         .p-check {
-            width: 20px; height: 20px; border-radius: 6px;
-            border: 1.5px solid var(--border);
+            width: 18px; height: 18px; border-radius: 5px;
+            border: 1.5px solid var(--border2);
             display: flex; align-items: center; justify-content: center;
-            transition: all 0.15s; flex-shrink: 0;
-        }
-        .participant-item.selected .p-check {
-            background: var(--primary); border-color: var(--primary);
+            flex-shrink: 0; transition: all 0.15s;
         }
         .p-check svg { display: none; }
-        .participant-item.selected .p-check svg { display: block; }
-        .p-amount {
-            width: 90px;
-            padding: 7px 10px;
-            border: 1.5px solid var(--border);
-            border-radius: 9px;
-            font-size: 13.5px; font-weight: 600;
-            font-family: 'Inter', sans-serif;
-            color: var(--text);
-            text-align: right;
-            background: white;
+        .p-item.on .p-check svg { display: block; }
+        .p-av {
+            width: 30px; height: 30px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px; font-weight: 700; color: var(--bg);
+            flex-shrink: 0;
+        }
+        .p-name { flex: 1; font-size: 13.5px; font-weight: 500; color: var(--text); }
+        .p-name .me-tag { font-size: 10px; color: var(--dim); font-weight: 400; }
+        .p-amt {
+            width: 86px; padding: 7px 10px;
+            background: var(--s1); border: 1px solid var(--border2);
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px; font-weight: 600;
+            color: var(--text); text-align: right;
             outline: none;
             transition: border-color 0.15s;
         }
-        .p-amount:focus { border-color: var(--primary); }
-        .p-amount[readonly] { background: #f8fafc; color: var(--mid); }
+        .p-amt:focus { border-color: var(--accent); }
+        .p-amt[readonly] { opacity: 0.5; cursor: default; }
 
-        /* Error */
-        .error-box {
-            background: var(--red-pale); border: 1px solid rgba(239,68,68,0.25);
-            border-radius: 11px; padding: 11px 15px;
-            color: var(--red); font-size: 13.5px; display: none;
-            align-items: center; gap: 9px;
+        /* ─── Error ─── */
+        .err-box {
+            display: none; align-items: center; gap: 9px;
+            background: var(--neg-s); border: 1px solid rgba(255,77,109,0.2);
+            border-radius: 10px; padding: 11px 14px;
+            color: var(--neg); font-size: 13.5px; margin-bottom: 14px;
         }
-        .error-box.show { display: flex; }
+        .err-box.show { display: flex; }
 
-        /* Submit button */
+        /* ─── Submit ─── */
         .btn-submit {
-            width: 100%; padding: 15px;
-            background: linear-gradient(135deg, #5b6af5 0%, #7c3aed 100%);
-            color: white; border: none; border-radius: 15px;
-            font-size: 15px; font-weight: 600;
-            cursor: pointer; font-family: 'Inter', sans-serif;
-            letter-spacing: -0.2px;
-            transition: opacity 0.15s, transform 0.1s;
-            box-shadow: 0 4px 20px rgba(91,106,245,0.3);
+            width: 100%; padding: 14px;
+            background: var(--accent); color: var(--bg);
+            border: none; border-radius: 12px;
+            font-size: 15px; font-weight: 700;
+            font-family: 'Outfit', sans-serif;
+            cursor: pointer; letter-spacing: -0.2px;
             display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: opacity 0.12s, transform 0.1s;
         }
-        .btn-submit:hover { opacity: 0.9; transform: translateY(-1px); }
-        .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .btn-submit:hover { opacity: 0.88; transform: translateY(-1px); }
+        .btn-submit:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
         /* ─── Preview card ─── */
-        .preview-card {
-            background: var(--white); border-radius: var(--r);
-            padding: 28px; box-shadow: var(--shadow);
-            display: flex; flex-direction: column; gap: 20px;
-            position: sticky; top: 0;
+        .preview {
+            display: flex; flex-direction: column;
+            gap: 20px; position: sticky; top: 0;
         }
 
-        .preview-amount-big {
-            font-size: 42px; font-weight: 800;
-            color: var(--text); letter-spacing: -2px;
+        .prev-amount {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: clamp(36px, 4vw, 52px);
+            font-weight: 800;
+            letter-spacing: -2.5px;
+            color: var(--text);
             line-height: 1;
+            transition: color 0.2s;
         }
-        .preview-label { font-size: 12px; color: var(--light); margin-top: 4px; }
-        .preview-title { font-size: 15px; font-weight: 600; color: var(--mid); margin-top: 2px; }
+        .prev-title {
+            font-family: 'Fraunces', serif;
+            font-size: 17px; font-style: italic;
+            color: var(--mid); margin-top: 5px;
+        }
+        .prev-group { font-size: 12px; color: var(--dim); margin-top: 3px; }
 
-        .preview-divider { height: 1px; background: var(--border); }
+        .divider { height: 1px; background: var(--border); }
 
-        .preview-row {
+        .prev-row {
             display: flex; align-items: center; gap: 10px;
             padding: 8px 0;
         }
-        .preview-row:not(:last-child) { border-bottom: 1px solid #f8fafc; }
-        .pr-avatar {
-            width: 32px; height: 32px; border-radius: 9px;
+        .prev-row:not(:last-child) { border-bottom: 1px solid var(--border); }
+        .pr-av {
+            width: 28px; height: 28px; border-radius: 7px;
             display: flex; align-items: center; justify-content: center;
-            font-size: 13px; font-weight: 700; color: white;
+            font-size: 11px; font-weight: 700; color: var(--bg);
+            flex-shrink: 0;
         }
-        .pr-name { flex: 1; font-size: 13.5px; color: var(--text); font-weight: 500; }
-        .pr-amount { font-size: 14px; font-weight: 700; color: var(--primary); }
+        .pr-name { flex: 1; font-size: 13px; color: var(--mid); }
+        .pr-amt {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px; font-weight: 700; color: var(--accent);
+        }
 
-        .balance-indicator {
-            padding: 10px 14px; border-radius: 12px;
-            font-size: 13px; font-weight: 600;
+        .balance-chip {
             display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 14px; border-radius: 10px;
+            font-size: 13px; font-weight: 600;
         }
-        .balance-indicator.ok { background: var(--green-pale); color: var(--green); }
-        .balance-indicator.bad { background: var(--red-pale); color: var(--red); }
+        .balance-chip.ok  { background: var(--pos-s); color: var(--pos); border: 1px solid rgba(181,242,61,0.2); }
+        .balance-chip.bad { background: var(--neg-s); color: var(--neg); border: 1px solid rgba(255,77,109,0.2); }
 
-        /* Quick transfer style section */
-        .payeur-card {
-            background: #f8faff; border-radius: 14px; padding: 14px 16px;
+        .payeur-preview {
+            display: flex; align-items: center; gap: 10px;
+            padding: 11px 14px;
+            background: var(--s2); border: 1px solid var(--border2);
+            border-radius: 11px;
         }
-        .payeur-row { display: flex; align-items: center; gap: 10px; }
-        .payeur-info { flex: 1; }
-        .payeur-name { font-size: 14px; font-weight: 600; color: var(--text); }
-        .payeur-sub { font-size: 12px; color: var(--light); }
+        .payeur-preview .pr-av { width: 32px; height: 32px; border-radius: 9px; font-size: 12px; }
+        .pp-name { font-size: 14px; font-weight: 600; color: var(--text); }
+        .pp-sub { font-size: 11.5px; color: var(--dim); }
 
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 5px; }
+        /* ─── Empty in preview ─── */
+        .prev-empty { color: var(--dim); font-size: 13px; padding: 8px 0; }
+
+        /* ─── Scrollbar ─── */
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
 
-        select.field-input {
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 14px center;
-            padding-right: 38px;
+        /* ─── Responsive ─── */
+        @media (max-width: 900px) {
+            .grid { grid-template-columns: 1fr; }
+            .preview { position: static; }
         }
 
-        .empty-members {
-            padding: 20px; text-align: center;
-            color: var(--light); font-size: 13.5px; border: 1.5px dashed var(--border);
-            border-radius: 13px; line-height: 1.5;
+        @media (max-width: 768px) {
+            html, body { overflow: auto; overflow-x: hidden; }
+            body { display: block; }
+            .sidebar {
+                position: fixed; bottom: 0; left: 0; right: 0; top: auto;
+                width: 100%; min-height: auto; height: 60px;
+                flex-direction: row;
+                border-right: none; border-top: 1px solid var(--border);
+                padding: 0 8px; z-index: 100;
+            }
+            .sb-logo { margin: 0 8px 0 0; font-size: 11px; padding: 4px 7px; }
+            .sb-nav { flex-direction: row; gap: 0; }
+            .sb-btn { flex: 1; height: 60px; width: auto; border-radius: 0; }
+            .sb-btn.active::before { left: 25%; right: 25%; top: 0; bottom: auto; width: auto; height: 2px; border-radius: 0 0 2px 2px; margin-left: 0; }
+            .sb-bottom { flex-direction: row; gap: 0; margin-left: auto; }
+            .sb-avatar { margin-top: 0; margin-right: 4px; }
+            .main { padding-bottom: 72px; min-height: 100vh; overflow: visible; }
+            .header { padding: 20px 16px 0; }
+            .grid { padding: 14px 16px 80px; gap: 14px; }
+        }
+
+        @media (max-width: 480px) {
+            .header-title { font-size: 22px; }
+            .prev-amount { font-size: 32px; }
         }
     </style>
 </head>
@@ -293,388 +372,312 @@
 
 <!-- Sidebar -->
 <aside class="sidebar">
-    <div class="sidebar-logo">T₂</div>
-    <nav class="sidebar-nav">
-        <a href="/dashboard/" class="nav-btn" title="Dashboard">
+    <span class="sb-logo">T₂</span>
+    <nav class="sb-nav">
+        <a href="/dashboard/" class="sb-btn" title="Dashboard">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+                <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
             </svg>
         </a>
-        <a href="/send/" class="nav-btn active" title="Ajouter une dépense">
+        <a href="/send/" class="sb-btn active" title="Nouvelle dépense">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
             </svg>
         </a>
-        <a href="/api/docs/" class="nav-btn" title="API Docs" target="_blank">
+        <a href="/api/docs/" class="sb-btn" title="API Docs" target="_blank">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
             </svg>
         </a>
     </nav>
-    <div class="sidebar-bottom">
-        <a href="/logout/" class="nav-btn" title="Déconnexion">
+    <div class="sb-bottom">
+        <a href="/logout/" class="sb-btn" title="Déconnexion">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
             </svg>
         </a>
-        <div class="nav-avatar" title="{{ user.username }}">{{ user.username|slice:":1"|upper }}</div>
+        <div class="sb-avatar" title="{{ user.username }}">{{ user.username|slice:":1"|upper }}</div>
     </div>
 </aside>
 
 <!-- Main -->
 <main class="main">
     <div class="header">
-        <div>
-            <div class="header-title">Nouvelle dépense</div>
-            <div class="header-sub">Ajoutez et répartissez une dépense entre les membres</div>
-        </div>
+        <div class="header-eyebrow">{{ user.username }}</div>
+        <div class="header-title">Nouvelle dépense</div>
     </div>
 
     <div class="grid">
-        <!-- Form card -->
-        <div class="card">
+
+        <!-- Form -->
+        <div class="card" style="display:flex;flex-direction:column;gap:20px;">
+
             <div>
-                <div class="section-title">Groupe & Description</div>
-                <div style="display:flex; flex-direction:column; gap:12px;">
-                    <div class="field">
-                        <label>Groupe *</label>
-                        <select class="field-input" id="groupe-select" onchange="onGroupChange(this.value)">
-                            <option value="">Chargement…</option>
-                        </select>
-                    </div>
-                    <div class="field">
-                        <label>Titre de la dépense *</label>
-                        <input type="text" id="titre" placeholder="Restaurant, Transport, Courses…" oninput="updatePreview()">
-                    </div>
+                <div class="section-label">Contexte</div>
+                <div class="field">
+                    <label>Groupe *</label>
+                    <select class="fi" id="g-sel" onchange="onGroup(this.value)">
+                        <option value="">Chargement…</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Titre *</label>
+                    <input type="text" id="titre" placeholder="Restaurant, Taxi, Courses…" oninput="preview()">
                 </div>
             </div>
 
             <div>
-                <div class="section-title">Montant</div>
-                <div class="amount-wrapper">
-                    <span class="currency">€</span>
-                    <input type="number" id="montant" placeholder="0.00" step="0.01" min="0.01" oninput="onMontantChange()">
+                <div class="section-label">Montant</div>
+                <div class="amt-wrap">
+                    <span class="amt-sym">€</span>
+                    <input type="number" id="montant" placeholder="0.00" step="0.01" min="0.01" oninput="onMontant()">
                 </div>
             </div>
 
             <div>
-                <div class="section-title">Payeur</div>
-                <div class="payeur-card" id="payeur-card">
-                    <div class="payeur-row">
-                        <div class="p-avatar" id="payeur-avatar" style="background:#5b6af5">{{ user.username|slice:":1"|upper }}</div>
-                        <div class="payeur-info">
-                            <select class="field-input" id="payeur-select" onchange="updatePreview()" style="border:none;background:transparent;padding:0;font-size:14px;font-weight:600;color:#0f172a;min-width:0;width:100%;">
-                                <option value="">Sélectionnez le payeur</option>
-                            </select>
-                            <div class="payeur-sub">A avancé la somme</div>
-                        </div>
-                    </div>
+                <div class="section-label">Payeur</div>
+                <div class="field" style="margin:0">
+                    <select class="fi" id="p-sel" onchange="preview()">
+                        <option value="">Sélectionnez le payeur</option>
+                    </select>
                 </div>
             </div>
 
             <div>
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-                    <div class="section-title" style="margin:0;">Participants & Répartition</div>
+                <div class="split-row">
+                    <div class="section-label" style="margin:0">Participants</div>
                     <div class="split-toggle">
-                        <button class="split-btn active" id="btn-equal" onclick="setSplit('equal')">Égale</button>
-                        <button class="split-btn" id="btn-custom" onclick="setSplit('custom')">Personnalisée</button>
+                        <button class="sp-btn active" id="sp-eq" onclick="setMode('equal')">= Égale</button>
+                        <button class="sp-btn" id="sp-cu" onclick="setMode('custom')">≠ Libre</button>
                     </div>
                 </div>
-                <div id="participants-container">
-                    <div class="empty-members">Sélectionnez un groupe pour afficher les membres.</div>
+                <div id="p-list">
+                    <div style="color:var(--dim);font-size:13.5px;padding:12px 0;">Sélectionnez un groupe pour afficher les membres.</div>
                 </div>
             </div>
 
-            <div id="error-box" class="error-box">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                <span id="error-text"></span>
-            </div>
-
-            <button class="btn-submit" id="submit-btn" onclick="submitExpense()">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
-                </svg>
-                Enregistrer la dépense
-            </button>
-        </div>
-
-        <!-- Preview card -->
-        <div class="preview-card">
             <div>
-                <div class="section-title">Récapitulatif</div>
-                <div class="preview-amount-big" id="preview-amount">0,00 €</div>
-                <div class="preview-title" id="preview-title">—</div>
-                <div class="preview-label" id="preview-group">Aucun groupe sélectionné</div>
-            </div>
-
-            <div class="preview-divider"></div>
-
-            <div>
-                <div class="section-title">Répartition</div>
-                <div id="preview-parts">
-                    <div style="color:var(--light);font-size:13.5px;padding:8px 0;">Ajoutez un montant et des participants.</div>
+                <div class="err-box" id="err-box">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <span id="err-txt"></span>
                 </div>
+                <button class="btn-submit" id="sub-btn" onclick="submit()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                    Enregistrer
+                </button>
             </div>
 
-            <div class="preview-divider"></div>
+        </div>
 
-            <div id="balance-indicator" class="balance-indicator ok" style="display:none;">
-                <span>Répartition</span>
-                <span id="balance-diff">0,00 €</span>
+        <!-- Preview -->
+        <div class="card preview">
+            <div>
+                <div class="section-label">Aperçu</div>
+                <div class="prev-amount" id="prev-amt">0,00 €</div>
+                <div class="prev-title" id="prev-titre">—</div>
+                <div class="prev-group" id="prev-grp">Aucun groupe</div>
             </div>
 
-            <div style="margin-top:auto;">
-                <div class="section-title" style="margin-bottom:8px;">Payé par</div>
-                <div id="preview-payeur" style="display:flex;align-items:center;gap:10px;color:var(--light);font-size:13.5px;">Sélectionnez un payeur</div>
+            <div class="divider"></div>
+
+            <div>
+                <div class="section-label" style="margin-bottom:8px">Répartition</div>
+                <div id="prev-parts"><div class="prev-empty">Renseignez un montant et des participants.</div></div>
+            </div>
+
+            <div id="bal-chip" style="display:none"></div>
+
+            <div class="divider"></div>
+
+            <div>
+                <div class="section-label" style="margin-bottom:8px">Payé par</div>
+                <div id="prev-payeur"><div class="prev-empty">Sélectionnez un payeur.</div></div>
             </div>
         </div>
+
     </div>
 </main>
 
 <script>
 const CSRF = '{{ csrf_token }}';
-const ME = { id: {{ user.id }}, username: '{{ user.username }}' };
+const ME   = { id: {{ user.id }}, username: '{{ user.username }}' };
 
-const COLORS = ['#5b6af5','#8b5cf6','#10b981','#f59e0b','#ef4444','#06b6d4','#ec4899','#f97316'];
-const getColor = (name) => COLORS[(name || '?').charCodeAt(0) % COLORS.length];
-const fmt = (n) => parseFloat(n || 0).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const PAL = ['#b5f23d','#60a5fa','#f472b6','#fb923c','#34d399','#a78bfa','#facc15','#38bdf8'];
+const hue = s => PAL[s.charCodeAt(0) % PAL.length];
+const fmt = n => parseFloat(n||0).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2});
 
-let members = [];   // [{id, username}]
-let selected = new Set();
-let splitMode = 'equal';
+let members=[], selected=new Set(), mode='equal';
 
-async function api(url, opts = {}) {
-    const r = await fetch(url, { headers: { 'X-CSRFToken': CSRF, 'Content-Type': 'application/json', ...opts.headers }, ...opts });
+async function api(url, opts={}) {
+    const r = await fetch(url, {headers:{'X-CSRFToken':CSRF,'Content-Type':'application/json',...opts.headers},...opts});
     return r.json();
 }
 
 async function init() {
     const groups = await api('/api/groupes/');
-    const sel = document.getElementById('groupe-select');
+    const sel = document.getElementById('g-sel');
     sel.innerHTML = groups.length
-        ? groups.map(g => `<option value="${g.id}">${g.nom}</option>`).join('')
-        : '<option value="">Aucun groupe disponible</option>';
-
-    if (groups.length) await onGroupChange(groups[0].id);
+        ? groups.map(g=>`<option value="${g.id}">${g.nom}</option>`).join('')
+        : '<option value="">Aucun groupe</option>';
+    if (groups.length) await onGroup(groups[0].id);
 }
 
-async function onGroupChange(groupId) {
-    if (!groupId) return;
-    const group = await api(`/api/groupes/${groupId}/`);
-    members = group.membres_detail || [];
-
-    document.getElementById('preview-group').textContent = group.nom;
+async function onGroup(id) {
+    if (!id) return;
+    const g = await api(`/api/groupes/${id}/`);
+    members = g.membres_detail || [];
+    document.getElementById('prev-grp').textContent = g.nom;
 
     // Payeur select
-    const payeurSel = document.getElementById('payeur-select');
-    payeurSel.innerHTML = members.map(m =>
-        `<option value="${m.id}">${m.username}${m.id === ME.id ? ' (moi)' : ''}</option>`
-    ).join('');
-    payeurSel.value = ME.id;
-    updatePayeurAvatar();
+    const ps = document.getElementById('p-sel');
+    ps.innerHTML = members.map(m=>`<option value="${m.id}">${m.username}${m.id===ME.id?' (moi)':''}</option>`).join('');
+    ps.value = ME.id;
 
-    // Pre-select all members
-    selected = new Set(members.map(m => m.id));
-
-    renderParticipants();
+    selected = new Set(members.map(m=>m.id));
+    renderList();
     updateSplit();
 }
 
-function updatePayeurAvatar() {
-    const id = parseInt(document.getElementById('payeur-select').value);
-    const m = members.find(x => x.id === id);
-    if (m) {
-        document.getElementById('payeur-avatar').textContent = m.username[0].toUpperCase();
-        document.getElementById('payeur-avatar').style.background = getColor(m.username);
-    }
-}
-
-document.getElementById('payeur-select').addEventListener('change', () => { updatePayeurAvatar(); updatePreview(); });
-
-function renderParticipants() {
-    const container = document.getElementById('participants-container');
-    if (!members.length) {
-        container.innerHTML = '<div class="empty-members">Aucun membre dans ce groupe.</div>';
-        return;
-    }
-    container.innerHTML = members.map(m => {
-        const isSelected = selected.has(m.id);
-        return `
-        <div class="participant-item ${isSelected ? 'selected' : ''}" id="pi-${m.id}" onclick="toggleParticipant(${m.id})">
-            <div class="p-avatar" style="background:${getColor(m.username)}">${m.username[0].toUpperCase()}</div>
-            <div class="p-name">${m.username}${m.id === ME.id ? ' <span style="color:var(--light);font-size:12px">(moi)</span>' : ''}</div>
-            <div class="p-check">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            </div>
-            <input type="number" class="p-amount" id="pa-${m.id}" value="0.00" min="0" step="0.01"
-                placeholder="0.00" onclick="event.stopPropagation()"
-                oninput="onCustomAmountChange()" ${splitMode === 'equal' ? 'readonly' : ''}>
+function renderList() {
+    const el = document.getElementById('p-list');
+    if (!members.length) { el.innerHTML='<div style="color:var(--dim);font-size:13px;padding:8px 0">Aucun membre.</div>'; return; }
+    el.innerHTML = members.map(m=>{
+        const on = selected.has(m.id);
+        return `<div class="p-item${on?' on':''}" id="pi-${m.id}" onclick="toggle(${m.id})">
+            <div class="p-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="${m.id===ME.id?'#09090d':hue(m.username)}" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="p-av" style="background:${hue(m.username)}">${m.username[0].toUpperCase()}</div>
+            <span class="p-name">${m.username}${m.id===ME.id?' <span class="me-tag">· moi</span>':''}</span>
+            <input type="number" class="p-amt" id="pa-${m.id}" value="0.00" min="0" step="0.01"
+                onclick="event.stopPropagation()" oninput="preview()"
+                ${mode==='equal'?'readonly':''}>
         </div>`;
     }).join('');
 }
 
-function toggleParticipant(id) {
-    if (selected.has(id)) {
-        if (selected.size <= 1) return; // at least 1
-        selected.delete(id);
-    } else {
-        selected.add(id);
-    }
-    const item = document.getElementById(`pi-${id}`);
-    item.classList.toggle('selected', selected.has(id));
-    item.querySelector('.p-check').style.background = selected.has(id) ? 'var(--primary)' : '';
-    updateSplit();
+function toggle(id) {
+    if (selected.has(id)) { if (selected.size<=1) return; selected.delete(id); }
+    else selected.add(id);
+    const el = document.getElementById(`pi-${id}`);
+    el.classList.toggle('on', selected.has(id));
+    if (mode==='equal') updateSplit(); else preview();
 }
 
-function setSplit(mode) {
-    splitMode = mode;
-    document.getElementById('btn-equal').classList.toggle('active', mode === 'equal');
-    document.getElementById('btn-custom').classList.toggle('active', mode === 'custom');
-    const inputs = document.querySelectorAll('.p-amount');
-    inputs.forEach(inp => { inp.readOnly = mode === 'equal'; });
-    if (mode === 'equal') updateSplit();
+function setMode(m) {
+    mode = m;
+    document.getElementById('sp-eq').classList.toggle('active', m==='equal');
+    document.getElementById('sp-cu').classList.toggle('active', m==='custom');
+    document.querySelectorAll('.p-amt').forEach(i=>{ i.readOnly = m==='equal'; });
+    if (m==='equal') updateSplit(); else preview();
 }
 
-function onMontantChange() {
-    if (splitMode === 'equal') updateSplit();
-    else updatePreview();
-}
+function onMontant() { if (mode==='equal') updateSplit(); else preview(); }
 
 function updateSplit() {
-    const montant = parseFloat(document.getElementById('montant').value) || 0;
-    const activeList = [...selected];
-    if (splitMode === 'equal' && activeList.length > 0) {
-        const share = Math.round(montant / activeList.length * 100) / 100;
-        const remainder = Math.round((montant - share * activeList.length) * 100) / 100;
-        members.forEach((m, idx) => {
-            const inp = document.getElementById(`pa-${m.id}`);
-            if (!inp) return;
-            if (selected.has(m.id)) {
-                const isFirst = activeList[0] === m.id;
-                inp.value = (isFirst ? share + remainder : share).toFixed(2);
-            } else {
-                inp.value = '0.00';
-            }
-        });
-    }
-    updatePreview();
+    const total = parseFloat(document.getElementById('montant').value)||0;
+    const active = [...selected];
+    if (!active.length || total<=0) { members.forEach(m=>{ const i=document.getElementById(`pa-${m.id}`); if(i) i.value='0.00'; }); preview(); return; }
+    const share = Math.round(total/active.length*100)/100;
+    const rem   = Math.round((total-share*active.length)*100)/100;
+    members.forEach((m,idx)=>{
+        const inp=document.getElementById(`pa-${m.id}`);
+        if(!inp) return;
+        if(selected.has(m.id)) inp.value = (active[0]===m.id ? share+rem : share).toFixed(2);
+        else inp.value='0.00';
+    });
+    preview();
 }
 
-function onCustomAmountChange() {
-    updatePreview();
-}
+function preview() {
+    const total  = parseFloat(document.getElementById('montant').value)||0;
+    const titre  = document.getElementById('titre').value.trim()||'—';
+    const pid    = parseInt(document.getElementById('p-sel').value);
+    const payeur = members.find(m=>m.id===pid);
 
-function updatePreview() {
-    const montant = parseFloat(document.getElementById('montant').value) || 0;
-    const titre = document.getElementById('titre').value.trim() || '—';
-    const payeurId = parseInt(document.getElementById('payeur-select').value);
-    const payeur = members.find(m => m.id === payeurId);
-
-    document.getElementById('preview-amount').textContent = fmt(montant) + ' €';
-    document.getElementById('preview-title').textContent = titre;
+    document.getElementById('prev-amt').textContent = fmt(total)+' €';
+    document.getElementById('prev-titre').textContent = titre;
 
     // Parts
-    const parts = [];
-    members.forEach(m => {
-        if (!selected.has(m.id)) return;
-        const inp = document.getElementById(`pa-${m.id}`);
-        const amt = parseFloat(inp?.value || 0);
-        if (amt > 0) parts.push({ id: m.id, username: m.username, amount: amt });
-    });
+    const parts = members.filter(m=>selected.has(m.id)).map(m=>{
+        const v=parseFloat(document.getElementById(`pa-${m.id}`)?.value||0);
+        return {id:m.id,username:m.username,amt:v};
+    }).filter(p=>p.amt>0);
 
-    const totalParts = parts.reduce((s, p) => s + p.amount, 0);
-    const diff = Math.round((montant - totalParts) * 100) / 100;
+    const sum = parts.reduce((s,p)=>s+p.amt,0);
+    const diff = Math.round((total-sum)*100)/100;
 
-    document.getElementById('preview-parts').innerHTML = parts.length
-        ? parts.map(p => `
-            <div class="preview-row">
-                <div class="pr-avatar" style="background:${getColor(p.username)}">${p.username[0].toUpperCase()}</div>
-                <div class="pr-name">${p.username}${p.id === ME.id ? ' (moi)' : ''}</div>
-                <div class="pr-amount">${fmt(p.amount)} €</div>
-            </div>`).join('')
-        : '<div style="color:var(--light);font-size:13.5px;padding:8px 0;">Sélectionnez des participants.</div>';
+    document.getElementById('prev-parts').innerHTML = parts.length
+        ? parts.map(p=>`<div class="prev-row">
+            <div class="pr-av" style="background:${hue(p.username)}">${p.username[0].toUpperCase()}</div>
+            <span class="pr-name">${p.username}${p.id===ME.id?' (moi)':''}</span>
+            <span class="pr-amt">${fmt(p.amt)} €</span>
+        </div>`).join('')
+        : '<div class="prev-empty">Sélectionnez des participants.</div>';
 
-    // Balance indicator
-    const indicator = document.getElementById('balance-indicator');
-    const diffEl = document.getElementById('balance-diff');
-    if (montant > 0) {
-        indicator.style.display = 'flex';
-        if (Math.abs(diff) < 0.01) {
-            indicator.className = 'balance-indicator ok';
-            diffEl.textContent = '✓ Équilibré';
+    const chip = document.getElementById('bal-chip');
+    if (total>0) {
+        chip.style.display='block';
+        if (Math.abs(diff)<0.01) {
+            chip.innerHTML='<div class="balance-chip ok"><span>Répartition</span><span>✓ Équilibrée</span></div>';
         } else {
-            indicator.className = 'balance-indicator bad';
-            diffEl.textContent = `Écart : ${diff > 0 ? '+' : ''}${fmt(diff)} €`;
+            chip.innerHTML=`<div class="balance-chip bad"><span>Écart</span><span>${diff>0?'+':''}${fmt(diff)} €</span></div>`;
         }
-    } else {
-        indicator.style.display = 'none';
-    }
+    } else { chip.style.display='none'; }
 
-    // Payeur preview
-    const ppEl = document.getElementById('preview-payeur');
     if (payeur) {
-        ppEl.innerHTML = `
-            <div class="pr-avatar" style="background:${getColor(payeur.username)}">${payeur.username[0].toUpperCase()}</div>
-            <div style="font-size:14px;font-weight:600;color:var(--text)">${payeur.username}${payeur.id === ME.id ? ' (moi)' : ''}</div>
-        `;
+        document.getElementById('prev-payeur').innerHTML=`<div class="payeur-preview">
+            <div class="pr-av" style="background:${hue(payeur.username)};width:32px;height:32px;border-radius:9px;font-size:12px">${payeur.username[0].toUpperCase()}</div>
+            <div><div class="pp-name">${payeur.username}${payeur.id===ME.id?' (moi)':''}</div><div class="pp-sub">A avancé la somme</div></div>
+        </div>`;
     } else {
-        ppEl.innerHTML = '<span style="color:var(--light);font-size:13.5px;">Sélectionnez un payeur</span>';
+        document.getElementById('prev-payeur').innerHTML='<div class="prev-empty">Sélectionnez un payeur.</div>';
     }
 }
 
-function showError(msg) {
-    const box = document.getElementById('error-box');
-    document.getElementById('error-text').textContent = msg;
-    box.classList.add('show');
-    box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+function showErr(msg) {
+    document.getElementById('err-txt').textContent=msg;
+    document.getElementById('err-box').classList.add('show');
+    document.getElementById('err-box').scrollIntoView({block:'nearest',behavior:'smooth'});
 }
-function hideError() { document.getElementById('error-box').classList.remove('show'); }
+function hideErr() { document.getElementById('err-box').classList.remove('show'); }
 
-async function submitExpense() {
-    hideError();
-    const groupeId = parseInt(document.getElementById('groupe-select').value);
-    const titre = document.getElementById('titre').value.trim();
-    const montant = parseFloat(document.getElementById('montant').value);
-    const payeurId = parseInt(document.getElementById('payeur-select').value);
+async function submit() {
+    hideErr();
+    const gid    = parseInt(document.getElementById('g-sel').value);
+    const titre  = document.getElementById('titre').value.trim();
+    const total  = parseFloat(document.getElementById('montant').value);
+    const pid    = parseInt(document.getElementById('p-sel').value);
 
-    if (!groupeId) return showError('Sélectionnez un groupe.');
-    if (!titre) return showError('Le titre est requis.');
-    if (!montant || montant <= 0) return showError('Le montant doit être supérieur à 0.');
-    if (!payeurId) return showError('Sélectionnez un payeur.');
+    if (!gid)           return showErr('Sélectionnez un groupe.');
+    if (!titre)         return showErr('Le titre est requis.');
+    if (!total||total<=0) return showErr('Le montant doit être supérieur à 0.');
+    if (!pid)           return showErr('Sélectionnez un payeur.');
 
-    const parts = [];
-    members.forEach(m => {
-        if (!selected.has(m.id)) return;
-        const inp = document.getElementById(`pa-${m.id}`);
-        const amt = parseFloat(inp?.value || 0);
-        if (amt > 0) parts.push({ participant: m.id, montant_part: amt.toFixed(2) });
-    });
+    const parts = members.filter(m=>selected.has(m.id)).map(m=>{
+        const v=parseFloat(document.getElementById(`pa-${m.id}`)?.value||0);
+        return {participant:m.id, montant_part:v.toFixed(2), _v:v};
+    }).filter(p=>p._v>0).map(({participant,montant_part})=>({participant,montant_part}));
 
-    if (!parts.length) return showError('Sélectionnez au moins un participant.');
+    if (!parts.length) return showErr('Au moins un participant est requis.');
 
-    const totalParts = parts.reduce((s, p) => s + parseFloat(p.montant_part), 0);
-    if (Math.abs(totalParts - montant) > 0.01) {
-        return showError(`La somme des parts (${fmt(totalParts)} €) doit être égale au montant (${fmt(montant)} €).`);
-    }
+    const sum = parts.reduce((s,p)=>s+parseFloat(p.montant_part),0);
+    if (Math.abs(sum-total)>0.01) return showErr(`La somme des parts (${fmt(sum)} €) doit être égale au montant (${fmt(total)} €).`);
 
-    const btn = document.getElementById('submit-btn');
-    btn.disabled = true;
-    btn.textContent = 'Enregistrement…';
+    const btn = document.getElementById('sub-btn');
+    btn.disabled=true; btn.textContent='Enregistrement…';
 
     const res = await fetch('/api/depenses/', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
-        body: JSON.stringify({ groupe: groupeId, titre, montant: montant.toFixed(2), payeur: payeurId, parts }),
+        headers: {'Content-Type':'application/json','X-CSRFToken':CSRF},
+        body: JSON.stringify({groupe:gid, titre, montant:total.toFixed(2), payeur:pid, parts}),
     });
 
     if (res.ok) {
-        window.location.href = '/dashboard/';
+        window.location.href='/dashboard/';
     } else {
         const err = await res.json();
-        const msg = typeof err === 'object' ? Object.values(err).flat().join(' — ') : JSON.stringify(err);
-        showError(msg);
-        btn.disabled = false;
-        btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Enregistrer la dépense`;
+        showErr(typeof err==='object' ? Object.values(err).flat().join(' — ') : String(err));
+        btn.disabled=false;
+        btn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Enregistrer';
     }
 }
 

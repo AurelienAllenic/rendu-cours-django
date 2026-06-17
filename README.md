@@ -10,6 +10,7 @@ API REST de partage de dépenses entre amis, développée avec **Django 5.1** et
 - Enregistrement de **dépenses** avec répartition personnalisée des parts
 - Calcul automatique des **soldes nets** par membre
 - Algorithme glouton de **minimisation des remboursements**
+- **Interface web moderne** (login, dashboard, ajout de dépense)
 - Documentation API interactive (Swagger UI & ReDoc)
 - Suite de tests unitaires complète
 
@@ -21,6 +22,7 @@ API REST de partage de dépenses entre amis, développée avec **Django 5.1** et
 |---|---|
 | Framework | Django 5.1 + Django REST Framework 3.15 |
 | Base de données | SQLite (dev) |
+| Interface web | Templates Django + Vanilla JS (fetch API) |
 | Documentation API | drf-spectacular (OpenAPI 3.0) |
 | CORS | django-cors-headers |
 | Tests | Django TestCase |
@@ -75,6 +77,29 @@ python manage.py runserver
 
 ---
 
+## Interface web
+
+L'application dispose d'une interface web moderne accessible directement depuis le navigateur, sans client séparé.
+
+### Pages disponibles
+
+| URL | Page | Description |
+|---|---|---|
+| `/` | — | Redirige vers `/dashboard/` |
+| `/login/` | Connexion / Inscription | Formulaire avec onglets, gestion d'erreurs |
+| `/dashboard/` | Dashboard groupe | Soldes membres, remboursements suggérés, historique des dépenses, création de groupe |
+| `/send/` | Nouvelle dépense | Formulaire d'ajout avec répartition égale ou personnalisée en temps réel |
+| `/logout/` | — | Déconnexion et redirection vers `/login/` |
+
+### Fonctionnement
+
+- L'authentification repose sur les **sessions Django** (cookie de session). Les pages `/dashboard/` et `/send/` nécessitent d'être connecté.
+- Les pages communiquent avec l'API REST via **fetch** côté client, en transmettant le token CSRF dans les en-têtes.
+- Les soldes et remboursements sont **calculés côté frontend** à partir des données renvoyées par `/api/depenses/`.
+- Le filtre `?groupe=<id>` sur `/api/depenses/` permet de charger uniquement les dépenses d'un groupe sélectionné.
+
+---
+
 ## Endpoints disponibles
 
 ### Groupes
@@ -104,6 +129,8 @@ python manage.py runserver
 | `/api/docs/` | Swagger UI (interface interactive) |
 | `/api/redoc/` | ReDoc (documentation lisible) |
 | `/api/schema/` | Schéma OpenAPI 3.0 brut (JSON/YAML) |
+
+> **Note** : le champ `membres_detail` a été ajouté à la réponse de `/api/groupes/` et `/api/groupes/{id}/`. Il expose `[{"id": 1, "username": "alice"}, …]` en lecture seule, en complément du champ `membres` existant (liste de chaînes).
 
 ---
 
@@ -191,19 +218,24 @@ rendu-django/
 │
 ├── tricount_api/               # Configuration Django
 │   ├── settings.py
-│   ├── urls.py
+│   ├── urls.py                 # Routes API + pages frontend
 │   ├── wsgi.py
 │   └── asgi.py
 │
 └── expenses/                   # Application métier
     ├── models.py               # Groupe, Depense, Part
-    ├── serializers.py          # Sérialisation + validation imbriquée
-    ├── views.py                # ViewSets (GroupeViewSet, DepenseViewSet)
+    ├── serializers.py          # Sérialisation + validation imbriquée + membres_detail
+    ├── views.py                # ViewSets API + vues frontend (login, dashboard, send)
     ├── services.py             # Logique métier pure (calcul des soldes)
     ├── permissions.py          # IsGroupMember
     ├── urls.py                 # Routeur DRF
     ├── admin.py                # Interface d'administration
-    └── tests.py                # Suite de tests unitaires
+    ├── tests.py                # Suite de tests unitaires
+    └── templates/
+        └── expenses/
+            ├── login.html      # Page connexion / inscription
+            ├── dashboard.html  # Dashboard groupe (soldes, remboursements, dépenses)
+            └── send.html       # Formulaire d'ajout de dépense
 ```
 
 ---

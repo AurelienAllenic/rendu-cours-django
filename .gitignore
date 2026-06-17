@@ -32,3 +32,5 @@ build/
 
 # Claude Code
 .claude/
+CLAUDE.md
+SKILL.md
