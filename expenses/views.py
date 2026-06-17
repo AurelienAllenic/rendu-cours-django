@@ -10,6 +10,9 @@ from .serializers import DepenseSerializer, GroupeSerializer
 class GroupeViewSet(viewsets.ModelViewSet):
     serializer_class = GroupeSerializer
     permission_classes = [IsAuthenticated, IsGroupMember]
+    # Utilisé par drf-spectacular pour l'inférence de type (pk = int).
+    # get_queryset() filtre réellement les données à l'exécution.
+    queryset = Groupe.objects.all()
 
     def get_queryset(self):
         return Groupe.objects.filter(membres=self.request.user)
@@ -22,6 +25,8 @@ class GroupeViewSet(viewsets.ModelViewSet):
 class DepenseViewSet(viewsets.ModelViewSet):
     serializer_class = DepenseSerializer
     permission_classes = [IsAuthenticated]
+    # Référence pour drf-spectacular uniquement.
+    queryset = Depense.objects.all()
 
     def get_queryset(self):
         return (
