@@ -330,6 +330,38 @@
         /* ─── Empty in preview ─── */
         .prev-empty { color: var(--dim); font-size: 13px; padding: 8px 0; }
 
+        /* ─── Currency toggle ─── */
+        .cur-toggle { display:inline-flex; background:var(--s2); border:1px solid var(--border2); border-radius:9px; padding:3px; gap:2px; }
+        .cur-btn { padding:5px 14px; border:none; border-radius:7px; background:transparent; font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700; color:var(--dim); cursor:pointer; transition:all 0.15s; line-height:1; }
+        .cur-btn.active { background:var(--s3); color:var(--accent); }
+        .cur-btn:hover:not(.active) { color:var(--mid); }
+        .cur-btn { flex:1; text-align:center; }
+
+        /* ─── Settings panel ─── */
+        .settings-panel {
+            position: fixed;
+            left: 78px;
+            bottom: 90px;
+            background: var(--s1);
+            border: 1px solid var(--border2);
+            border-radius: 14px;
+            padding: 18px;
+            min-width: 190px;
+            box-shadow: 0 12px 48px rgba(0,0,0,0.55), 0 0 0 1px var(--border);
+            z-index: 300;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateX(-10px) scale(0.96);
+            transform-origin: left bottom;
+            transition: opacity 0.18s cubic-bezier(0.16,1,0.3,1), transform 0.18s cubic-bezier(0.16,1,0.3,1);
+        }
+        .settings-panel.open { opacity:1; pointer-events:all; transform:translateX(0) scale(1); }
+        .sp-title { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1.2px; color:var(--dim); margin-bottom:14px; }
+        .sp-row { margin-bottom:12px; }
+        .sp-row:last-child { margin-bottom:0; }
+        .sp-label { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.8px; color:var(--mid); margin-bottom:8px; display:block; }
+        .settings-panel .cur-toggle { width:100%; }
+
         /* ─── Scrollbar ─── */
         ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
@@ -360,6 +392,8 @@
             .main { padding-bottom: 72px; min-height: 100vh; overflow: visible; }
             .header { padding: 20px 16px 0; }
             .grid { padding: 14px 16px 80px; gap: 14px; }
+            .settings-panel { left:8px; right:8px; bottom:68px; min-width:0; transform:translateY(10px) scale(0.96); transform-origin:bottom center; }
+            .settings-panel.open { transform:translateY(0) scale(1); }
         }
 
         @media (max-width: 480px) {
@@ -391,6 +425,11 @@
         </a>
     </nav>
     <div class="sb-bottom">
+        <button class="sb-btn" id="settings-btn" onclick="toggleSettings(event)" title="Paramètres">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+        </button>
         <a href="/logout/" class="sb-btn" title="Déconnexion">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
@@ -399,6 +438,19 @@
         <div class="sb-avatar" title="{{ user.username }}">{{ user.username|slice:":1"|upper }}</div>
     </div>
 </aside>
+
+<!-- Settings panel -->
+<div class="settings-panel" id="settings-panel">
+    <div class="sp-title">Paramètres</div>
+    <div class="sp-row">
+        <span class="sp-label">Devise</span>
+        <div class="cur-toggle">
+            <button class="cur-btn" data-cur="€" onclick="setCurrency('€')">€</button>
+            <button class="cur-btn" data-cur="$" onclick="setCurrency('$')">$</button>
+            <button class="cur-btn" data-cur="£" onclick="setCurrency('£')">£</button>
+        </div>
+    </div>
+</div>
 
 <!-- Main -->
 <main class="main">
@@ -473,7 +525,7 @@
         <div class="card preview">
             <div>
                 <div class="section-label">Aperçu</div>
-                <div class="prev-amount" id="prev-amt">0,00 €</div>
+                <div class="prev-amount" id="prev-amt">0,00</div>
                 <div class="prev-title" id="prev-titre">—</div>
                 <div class="prev-group" id="prev-grp">Aucun groupe</div>
             </div>
@@ -501,6 +553,17 @@
 <script>
 const CSRF = '{{ csrf_token }}';
 const ME   = { id: {{ user.id }}, username: '{{ user.username }}' };
+
+let cur = localStorage.getItem('tricount_cur') || '€';
+const sym = () => cur;
+
+function setCurrency(c) {
+    cur = c;
+    localStorage.setItem('tricount_cur', c);
+    document.querySelectorAll('.cur-btn').forEach(b => b.classList.toggle('active', b.dataset.cur===c));
+    document.querySelectorAll('.amt-sym').forEach(s => s.textContent = c);
+    preview();
+}
 
 const PAL = ['#b5f23d','#60a5fa','#f472b6','#fb923c','#34d399','#a78bfa','#facc15','#38bdf8'];
 const hue = s => PAL[s.charCodeAt(0) % PAL.length];
@@ -593,7 +656,7 @@ function preview() {
     const pid    = parseInt(document.getElementById('p-sel').value);
     const payeur = members.find(m=>m.id===pid);
 
-    document.getElementById('prev-amt').textContent = fmt(total)+' €';
+    document.getElementById('prev-amt').textContent = fmt(total)+' '+sym();
     document.getElementById('prev-titre').textContent = titre;
 
     // Parts
@@ -609,7 +672,7 @@ function preview() {
         ? parts.map(p=>`<div class="prev-row">
             <div class="pr-av" style="background:${hue(p.username)}">${p.username[0].toUpperCase()}</div>
             <span class="pr-name">${p.username}${p.id===ME.id?' (moi)':''}</span>
-            <span class="pr-amt">${fmt(p.amt)} €</span>
+            <span class="pr-amt">${fmt(p.amt)} ${sym()}</span>
         </div>`).join('')
         : '<div class="prev-empty">Sélectionnez des participants.</div>';
 
@@ -619,7 +682,7 @@ function preview() {
         if (Math.abs(diff)<0.01) {
             chip.innerHTML='<div class="balance-chip ok"><span>Répartition</span><span>✓ Équilibrée</span></div>';
         } else {
-            chip.innerHTML=`<div class="balance-chip bad"><span>Écart</span><span>${diff>0?'+':''}${fmt(diff)} €</span></div>`;
+            chip.innerHTML=`<div class="balance-chip bad"><span>Écart</span><span>${diff>0?'+':''}${fmt(diff)} ${sym()}</span></div>`;
         }
     } else { chip.style.display='none'; }
 
@@ -660,7 +723,7 @@ async function submit() {
     if (!parts.length) return showErr('Au moins un participant est requis.');
 
     const sum = parts.reduce((s,p)=>s+parseFloat(p.montant_part),0);
-    if (Math.abs(sum-total)>0.01) return showErr(`La somme des parts (${fmt(sum)} €) doit être égale au montant (${fmt(total)} €).`);
+    if (Math.abs(sum-total)>0.01) return showErr(`La somme des parts (${fmt(sum)} ${sym()}) doit être égale au montant (${fmt(total)} ${sym()}).`);
 
     const btn = document.getElementById('sub-btn');
     btn.disabled=true; btn.textContent='Enregistrement…';
@@ -681,6 +744,19 @@ async function submit() {
     }
 }
 
+function toggleSettings(e) {
+    e.stopPropagation();
+    const open = document.getElementById('settings-panel').classList.toggle('open');
+    document.getElementById('settings-btn').classList.toggle('active', open);
+}
+document.addEventListener('click', e => {
+    if (!e.target.closest('#settings-panel') && !e.target.closest('#settings-btn')) {
+        document.getElementById('settings-panel').classList.remove('open');
+        document.getElementById('settings-btn').classList.remove('active');
+    }
+});
+
+setCurrency(cur);
 init();
 </script>
 </body>
