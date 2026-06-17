@@ -18,6 +18,7 @@ INSTALLED_APPS = [
     # Third-party
     'rest_framework',
     'corsheaders',
+    'drf_spectacular',
     # Local
     'expenses',
 ]
@@ -87,6 +88,20 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
     ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+# drf-spectacular — configuration OpenAPI
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Tricount API',
+    'DESCRIPTION': (
+        'API de partage de dépenses entre amis. '
+        'Gestion des groupes, des dépenses et calcul automatique des remboursements.'
+    ),
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'CONTACT': {'name': 'Équipe Tricount'},
+    'LICENSE': {'name': 'MIT'},
 }
 
 # CORS — à restreindre en production
