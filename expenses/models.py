@@ -40,7 +40,7 @@ class Depense(models.Model):
         on_delete=models.CASCADE,
         related_name='depenses_payees',
     )
-    date = models.DateTimeField(auto_now_add=True)
+    date_creation = models.DateTimeField(auto_now_add=True)
 
     # M2M explicite via la table Part (through) pour stocker montant_part
     participants = models.ManyToManyField(
@@ -50,7 +50,7 @@ class Depense(models.Model):
     )
 
     class Meta:
-        ordering = ['-date']
+        ordering = ['-date_creation']
         verbose_name = 'Dépense'
         verbose_name_plural = 'Dépenses'
 
