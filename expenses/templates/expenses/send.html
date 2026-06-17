@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tricount — Nouvelle dépense</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg: #edf1f9;
+            --white: #ffffff;
+            --primary: #5b6af5;
+            --primary-pale: rgba(91,106,245,0.08);
+            --primary-border: rgba(91,106,245,0.25);
+            --text: #0f172a;
+            --mid: #475569;
+            --light: #94a3b8;
+            --border: #e8edf6;
+            --shadow: 0 2px 20px rgba(15,23,42,0.06);
+            --r: 20px;
+            --green: #10b981;
+            --green-pale: rgba(16,185,129,0.1);
+            --red: #ef4444;
+            --red-pale: rgba(239,68,68,0.1);
+        }
+        html, body { height: 100%; overflow: hidden; }
+        body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); display: flex; }
+
+        /* ─── Sidebar ─── */
+        .sidebar {
+            width: 72px; min-height: 100vh;
+            background: var(--white);
+            border-right: 1px solid var(--border);
+            display: flex; flex-direction: column; align-items: center;
+            padding: 20px 0; flex-shrink: 0; z-index: 10;
+        }
+        .sidebar-logo {
+            width: 42px; height: 42px; border-radius: 13px;
+            background: linear-gradient(135deg, #5b6af5 0%, #8b5cf6 100%);
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 14px; font-weight: 800;
+            margin-bottom: 32px;
+            box-shadow: 0 4px 14px rgba(91,106,245,0.3);
+        }
+        .sidebar-nav { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; }
+        .nav-btn {
+            width: 44px; height: 44px; border-radius: 13px;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--light); text-decoration: none;
+            transition: all 0.18s; cursor: pointer;
+            background: transparent; border: none;
+        }
+        .nav-btn:hover { background: var(--primary-pale); color: var(--primary); }
+        .nav-btn.active { background: var(--primary-pale); color: var(--primary); }
+        .nav-btn svg { width: 20px; height: 20px; }
+        .sidebar-bottom { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+        .nav-avatar {
+            width: 36px; height: 36px; border-radius: 50%;
+            background: linear-gradient(135deg, #5b6af5, #8b5cf6);
+            color: white; display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 700; margin-top: 4px;
+        }
+
+        /* ─── Main ─── */
+        .main {
+            flex: 1; overflow-y: auto;
+            display: flex; flex-direction: column;
+            padding: 28px; gap: 22px; min-width: 0;
+        }
+
+        .header { display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+        .header-title { font-size: 22px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; }
+        .header-sub { font-size: 13px; color: var(--light); margin-top: 2px; }
+
+        /* ─── Grid ─── */
+        .grid {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 20px;
+            flex: 1;
+        }
+
+        /* ─── Card ─── */
+        .card {
+            background: var(--white);
+            border-radius: var(--r);
+            padding: 28px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+            overflow-y: auto;
+        }
+
+        .card-title { font-size: 15px; font-weight: 700; color: var(--text); }
+        .section-title { font-size: 11.5px; font-weight: 700; color: var(--light); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 10px; }
+
+        /* ─── Form fields ─── */
+        .field { display: flex; flex-direction: column; gap: 7px; }
+        .field label { font-size: 12px; font-weight: 600; color: var(--mid); text-transform: uppercase; letter-spacing: 0.3px; }
+
+        input[type="text"], input[type="number"], select.field-input {
+            padding: 13px 16px;
+            border: 1.5px solid var(--border);
+            border-radius: 13px;
+            font-size: 14.5px;
+            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            background: #fafbff;
+            outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s;
+            width: 100%;
+            -webkit-appearance: none;
+        }
+        input::placeholder { color: #c4cdd8; }
+        input:focus, select.field-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(91,106,245,0.1);
+            background: #fff;
+        }
+
+        /* Amount input */
+        .amount-wrapper { position: relative; }
+        .amount-wrapper .currency {
+            position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+            font-size: 18px; font-weight: 700; color: var(--light);
+        }
+        .amount-wrapper input { padding-left: 34px; font-size: 22px; font-weight: 700; color: var(--text); }
+
+        /* Split toggle */
+        .split-toggle {
+            display: flex;
+            background: #f1f5f9;
+            border-radius: 11px;
+            padding: 3px;
+            gap: 3px;
+        }
+        .split-btn {
+            flex: 1; padding: 8px 12px;
+            border: none; border-radius: 8px;
+            font-size: 13px; font-weight: 500;
+            cursor: pointer; font-family: 'Inter', sans-serif;
+            color: var(--mid); background: transparent;
+            transition: all 0.15s;
+        }
+        .split-btn.active {
+            background: white; color: var(--primary); font-weight: 600;
+            box-shadow: 0 1px 8px rgba(91,106,245,0.13);
+        }
+
+        /* Participants */
+        .participant-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 10px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 13px;
+            cursor: pointer;
+            transition: all 0.15s;
+            background: #fafbff;
+        }
+        .participant-item.selected {
+            border-color: var(--primary-border);
+            background: var(--primary-pale);
+        }
+        .p-avatar {
+            width: 34px; height: 34px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; font-weight: 700; color: white; flex-shrink: 0;
+        }
+        .p-name { flex: 1; font-size: 14px; font-weight: 500; color: var(--text); }
+        .p-check {
+            width: 20px; height: 20px; border-radius: 6px;
+            border: 1.5px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.15s; flex-shrink: 0;
+        }
+        .participant-item.selected .p-check {
+            background: var(--primary); border-color: var(--primary);
+        }
+        .p-check svg { display: none; }
+        .participant-item.selected .p-check svg { display: block; }
+        .p-amount {
+            width: 90px;
+            padding: 7px 10px;
+            border: 1.5px solid var(--border);
+            border-radius: 9px;
+            font-size: 13.5px; font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            text-align: right;
+            background: white;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+        .p-amount:focus { border-color: var(--primary); }
+        .p-amount[readonly] { background: #f8fafc; color: var(--mid); }
+
+        /* Error */
+        .error-box {
+            background: var(--red-pale); border: 1px solid rgba(239,68,68,0.25);
+            border-radius: 11px; padding: 11px 15px;
+            color: var(--red); font-size: 13.5px; display: none;
+            align-items: center; gap: 9px;
+        }
+        .error-box.show { display: flex; }
+
+        /* Submit button */
+        .btn-submit {
+            width: 100%; padding: 15px;
+            background: linear-gradient(135deg, #5b6af5 0%, #7c3aed 100%);
+            color: white; border: none; border-radius: 15px;
+            font-size: 15px; font-weight: 600;
+            cursor: pointer; font-family: 'Inter', sans-serif;
+            letter-spacing: -0.2px;
+            transition: opacity 0.15s, transform 0.1s;
+            box-shadow: 0 4px 20px rgba(91,106,245,0.3);
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-submit:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        /* ─── Preview card ─── */
+        .preview-card {
+            background: var(--white); border-radius: var(--r);
+            padding: 28px; box-shadow: var(--shadow);
+            display: flex; flex-direction: column; gap: 20px;
+            position: sticky; top: 0;
+        }
+
+        .preview-amount-big {
+            font-size: 42px; font-weight: 800;
+            color: var(--text); letter-spacing: -2px;
+            line-height: 1;
+        }
+        .preview-label { font-size: 12px; color: var(--light); margin-top: 4px; }
+        .preview-title { font-size: 15px; font-weight: 600; color: var(--mid); margin-top: 2px; }
+
+        .preview-divider { height: 1px; background: var(--border); }
+
+        .preview-row {
+            display: flex; align-items: center; gap: 10px;
+            padding: 8px 0;
+        }
+        .preview-row:not(:last-child) { border-bottom: 1px solid #f8fafc; }
+        .pr-avatar {
+            width: 32px; height: 32px; border-radius: 9px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 700; color: white;
+        }
+        .pr-name { flex: 1; font-size: 13.5px; color: var(--text); font-weight: 500; }
+        .pr-amount { font-size: 14px; font-weight: 700; color: var(--primary); }
+
+        .balance-indicator {
+            padding: 10px 14px; border-radius: 12px;
+            font-size: 13px; font-weight: 600;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .balance-indicator.ok { background: var(--green-pale); color: var(--green); }
+        .balance-indicator.bad { background: var(--red-pale); color: var(--red); }
+
+        /* Quick transfer style section */
+        .payeur-card {
+            background: #f8faff; border-radius: 14px; padding: 14px 16px;
+        }
+        .payeur-row { display: flex; align-items: center; gap: 10px; }
+        .payeur-info { flex: 1; }
+        .payeur-name { font-size: 14px; font-weight: 600; color: var(--text); }
+        .payeur-sub { font-size: 12px; color: var(--light); }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 3px; }
+
+        select.field-input {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 38px;
+        }
+
+        .empty-members {
+            padding: 20px; text-align: center;
+            color: var(--light); font-size: 13.5px; border: 1.5px dashed var(--border);
+            border-radius: 13px; line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+    <div class="sidebar-logo">T₂</div>
+    <nav class="sidebar-nav">
+        <a href="/dashboard/" class="nav-btn" title="Dashboard">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+        </a>
+        <a href="/send/" class="nav-btn active" title="Ajouter une dépense">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+        </a>
+        <a href="/api/docs/" class="nav-btn" title="API Docs" target="_blank">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+        </a>
+    </nav>
+    <div class="sidebar-bottom">
+        <a href="/logout/" class="nav-btn" title="Déconnexion">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+        </a>
+        <div class="nav-avatar" title="{{ user.username }}">{{ user.username|slice:":1"|upper }}</div>
+    </div>
+</aside>
+
+<!-- Main -->
+<main class="main">
+    <div class="header">
+        <div>
+            <div class="header-title">Nouvelle dépense</div>
+            <div class="header-sub">Ajoutez et répartissez une dépense entre les membres</div>
+        </div>
+    </div>
+
+    <div class="grid">
+        <!-- Form card -->
+        <div class="card">
+            <div>
+                <div class="section-title">Groupe & Description</div>
+                <div style="display:flex; flex-direction:column; gap:12px;">
+                    <div class="field">
+                        <label>Groupe *</label>
+                        <select class="field-input" id="groupe-select" onchange="onGroupChange(this.value)">
+                            <option value="">Chargement…</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Titre de la dépense *</label>
+                        <input type="text" id="titre" placeholder="Restaurant, Transport, Courses…" oninput="updatePreview()">
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="section-title">Montant</div>
+                <div class="amount-wrapper">
+                    <span class="currency">€</span>
+                    <input type="number" id="montant" placeholder="0.00" step="0.01" min="0.01" oninput="onMontantChange()">
+                </div>
+            </div>
+
+            <div>
+                <div class="section-title">Payeur</div>
+                <div class="payeur-card" id="payeur-card">
+                    <div class="payeur-row">
+                        <div class="p-avatar" id="payeur-avatar" style="background:#5b6af5">{{ user.username|slice:":1"|upper }}</div>
+                        <div class="payeur-info">
+                            <select class="field-input" id="payeur-select" onchange="updatePreview()" style="border:none;background:transparent;padding:0;font-size:14px;font-weight:600;color:#0f172a;min-width:0;width:100%;">
+                                <option value="">Sélectionnez le payeur</option>
+                            </select>
+                            <div class="payeur-sub">A avancé la somme</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+                    <div class="section-title" style="margin:0;">Participants & Répartition</div>
+                    <div class="split-toggle">
+                        <button class="split-btn active" id="btn-equal" onclick="setSplit('equal')">Égale</button>
+                        <button class="split-btn" id="btn-custom" onclick="setSplit('custom')">Personnalisée</button>
+                    </div>
+                </div>
+                <div id="participants-container">
+                    <div class="empty-members">Sélectionnez un groupe pour afficher les membres.</div>
+                </div>
+            </div>
+
+            <div id="error-box" class="error-box">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span id="error-text"></span>
+            </div>
+
+            <button class="btn-submit" id="submit-btn" onclick="submitExpense()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                </svg>
+                Enregistrer la dépense
+            </button>
+        </div>
+
+        <!-- Preview card -->
+        <div class="preview-card">
+            <div>
+                <div class="section-title">Récapitulatif</div>
+                <div class="preview-amount-big" id="preview-amount">0,00 €</div>
+                <div class="preview-title" id="preview-title">—</div>
+                <div class="preview-label" id="preview-group">Aucun groupe sélectionné</div>
+            </div>
+
+            <div class="preview-divider"></div>
+
+            <div>
+                <div class="section-title">Répartition</div>
+                <div id="preview-parts">
+                    <div style="color:var(--light);font-size:13.5px;padding:8px 0;">Ajoutez un montant et des participants.</div>
+                </div>
+            </div>
+
+            <div class="preview-divider"></div>
+
+            <div id="balance-indicator" class="balance-indicator ok" style="display:none;">
+                <span>Répartition</span>
+                <span id="balance-diff">0,00 €</span>
+            </div>
+
+            <div style="margin-top:auto;">
+                <div class="section-title" style="margin-bottom:8px;">Payé par</div>
+                <div id="preview-payeur" style="display:flex;align-items:center;gap:10px;color:var(--light);font-size:13.5px;">Sélectionnez un payeur</div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+const CSRF = '{{ csrf_token }}';
+const ME = { id: {{ user.id }}, username: '{{ user.username }}' };
+
+const COLORS = ['#5b6af5','#8b5cf6','#10b981','#f59e0b','#ef4444','#06b6d4','#ec4899','#f97316'];
+const getColor = (name) => COLORS[(name || '?').charCodeAt(0) % COLORS.length];
+const fmt = (n) => parseFloat(n || 0).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+let members = [];   // [{id, username}]
+let selected = new Set();
+let splitMode = 'equal';
+
+async function api(url, opts = {}) {
+    const r = await fetch(url, { headers: { 'X-CSRFToken': CSRF, 'Content-Type': 'application/json', ...opts.headers }, ...opts });
+    return r.json();
+}
+
+async function init() {
+    const groups = await api('/api/groupes/');
+    const sel = document.getElementById('groupe-select');
+    sel.innerHTML = groups.length
+        ? groups.map(g => `<option value="${g.id}">${g.nom}</option>`).join('')
+        : '<option value="">Aucun groupe disponible</option>';
+
+    if (groups.length) await onGroupChange(groups[0].id);
+}
+
+async function onGroupChange(groupId) {
+    if (!groupId) return;
+    const group = await api(`/api/groupes/${groupId}/`);
+    members = group.membres_detail || [];
+
+    document.getElementById('preview-group').textContent = group.nom;
+
+    // Payeur select
+    const payeurSel = document.getElementById('payeur-select');
+    payeurSel.innerHTML = members.map(m =>
+        `<option value="${m.id}">${m.username}${m.id === ME.id ? ' (moi)' : ''}</option>`
+    ).join('');
+    payeurSel.value = ME.id;
+    updatePayeurAvatar();
+
+    // Pre-select all members
+    selected = new Set(members.map(m => m.id));
+
+    renderParticipants();
+    updateSplit();
+}
+
+function updatePayeurAvatar() {
+    const id = parseInt(document.getElementById('payeur-select').value);
+    const m = members.find(x => x.id === id);
+    if (m) {
+        document.getElementById('payeur-avatar').textContent = m.username[0].toUpperCase();
+        document.getElementById('payeur-avatar').style.background = getColor(m.username);
+    }
+}
+
+document.getElementById('payeur-select').addEventListener('change', () => { updatePayeurAvatar(); updatePreview(); });
+
+function renderParticipants() {
+    const container = document.getElementById('participants-container');
+    if (!members.length) {
+        container.innerHTML = '<div class="empty-members">Aucun membre dans ce groupe.</div>';
+        return;
+    }
+    container.innerHTML = members.map(m => {
+        const isSelected = selected.has(m.id);
+        return `
+        <div class="participant-item ${isSelected ? 'selected' : ''}" id="pi-${m.id}" onclick="toggleParticipant(${m.id})">
+            <div class="p-avatar" style="background:${getColor(m.username)}">${m.username[0].toUpperCase()}</div>
+            <div class="p-name">${m.username}${m.id === ME.id ? ' <span style="color:var(--light);font-size:12px">(moi)</span>' : ''}</div>
+            <div class="p-check">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <input type="number" class="p-amount" id="pa-${m.id}" value="0.00" min="0" step="0.01"
+                placeholder="0.00" onclick="event.stopPropagation()"
+                oninput="onCustomAmountChange()" ${splitMode === 'equal' ? 'readonly' : ''}>
+        </div>`;
+    }).join('');
+}
+
+function toggleParticipant(id) {
+    if (selected.has(id)) {
+        if (selected.size <= 1) return; // at least 1
+        selected.delete(id);
+    } else {
+        selected.add(id);
+    }
+    const item = document.getElementById(`pi-${id}`);
+    item.classList.toggle('selected', selected.has(id));
+    item.querySelector('.p-check').style.background = selected.has(id) ? 'var(--primary)' : '';
+    updateSplit();
+}
+
+function setSplit(mode) {
+    splitMode = mode;
+    document.getElementById('btn-equal').classList.toggle('active', mode === 'equal');
+    document.getElementById('btn-custom').classList.toggle('active', mode === 'custom');
+    const inputs = document.querySelectorAll('.p-amount');
+    inputs.forEach(inp => { inp.readOnly = mode === 'equal'; });
+    if (mode === 'equal') updateSplit();
+}
+
+function onMontantChange() {
+    if (splitMode === 'equal') updateSplit();
+    else updatePreview();
+}
+
+function updateSplit() {
+    const montant = parseFloat(document.getElementById('montant').value) || 0;
+    const activeList = [...selected];
+    if (splitMode === 'equal' && activeList.length > 0) {
+        const share = Math.round(montant / activeList.length * 100) / 100;
+        const remainder = Math.round((montant - share * activeList.length) * 100) / 100;
+        members.forEach((m, idx) => {
+            const inp = document.getElementById(`pa-${m.id}`);
+            if (!inp) return;
+            if (selected.has(m.id)) {
+                const isFirst = activeList[0] === m.id;
+                inp.value = (isFirst ? share + remainder : share).toFixed(2);
+            } else {
+                inp.value = '0.00';
+            }
+        });
+    }
+    updatePreview();
+}
+
+function onCustomAmountChange() {
+    updatePreview();
+}
+
+function updatePreview() {
+    const montant = parseFloat(document.getElementById('montant').value) || 0;
+    const titre = document.getElementById('titre').value.trim() || '—';
+    const payeurId = parseInt(document.getElementById('payeur-select').value);
+    const payeur = members.find(m => m.id === payeurId);
+
+    document.getElementById('preview-amount').textContent = fmt(montant) + ' €';
+    document.getElementById('preview-title').textContent = titre;
+
+    // Parts
+    const parts = [];
+    members.forEach(m => {
+        if (!selected.has(m.id)) return;
+        const inp = document.getElementById(`pa-${m.id}`);
+        const amt = parseFloat(inp?.value || 0);
+        if (amt > 0) parts.push({ id: m.id, username: m.username, amount: amt });
+    });
+
+    const totalParts = parts.reduce((s, p) => s + p.amount, 0);
+    const diff = Math.round((montant - totalParts) * 100) / 100;
+
+    document.getElementById('preview-parts').innerHTML = parts.length
+        ? parts.map(p => `
+            <div class="preview-row">
+                <div class="pr-avatar" style="background:${getColor(p.username)}">${p.username[0].toUpperCase()}</div>
+                <div class="pr-name">${p.username}${p.id === ME.id ? ' (moi)' : ''}</div>
+                <div class="pr-amount">${fmt(p.amount)} €</div>
+            </div>`).join('')
+        : '<div style="color:var(--light);font-size:13.5px;padding:8px 0;">Sélectionnez des participants.</div>';
+
+    // Balance indicator
+    const indicator = document.getElementById('balance-indicator');
+    const diffEl = document.getElementById('balance-diff');
+    if (montant > 0) {
+        indicator.style.display = 'flex';
+        if (Math.abs(diff) < 0.01) {
+            indicator.className = 'balance-indicator ok';
+            diffEl.textContent = '✓ Équilibré';
+        } else {
+            indicator.className = 'balance-indicator bad';
+            diffEl.textContent = `Écart : ${diff > 0 ? '+' : ''}${fmt(diff)} €`;
+        }
+    } else {
+        indicator.style.display = 'none';
+    }
+
+    // Payeur preview
+    const ppEl = document.getElementById('preview-payeur');
+    if (payeur) {
+        ppEl.innerHTML = `
+            <div class="pr-avatar" style="background:${getColor(payeur.username)}">${payeur.username[0].toUpperCase()}</div>
+            <div style="font-size:14px;font-weight:600;color:var(--text)">${payeur.username}${payeur.id === ME.id ? ' (moi)' : ''}</div>
+        `;
+    } else {
+        ppEl.innerHTML = '<span style="color:var(--light);font-size:13.5px;">Sélectionnez un payeur</span>';
+    }
+}
+
+function showError(msg) {
+    const box = document.getElementById('error-box');
+    document.getElementById('error-text').textContent = msg;
+    box.classList.add('show');
+    box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+function hideError() { document.getElementById('error-box').classList.remove('show'); }
+
+async function submitExpense() {
+    hideError();
+    const groupeId = parseInt(document.getElementById('groupe-select').value);
+    const titre = document.getElementById('titre').value.trim();
+    const montant = parseFloat(document.getElementById('montant').value);
+    const payeurId = parseInt(document.getElementById('payeur-select').value);
+
+    if (!groupeId) return showError('Sélectionnez un groupe.');
+    if (!titre) return showError('Le titre est requis.');
+    if (!montant || montant <= 0) return showError('Le montant doit être supérieur à 0.');
+    if (!payeurId) return showError('Sélectionnez un payeur.');
+
+    const parts = [];
+    members.forEach(m => {
+        if (!selected.has(m.id)) return;
+        const inp = document.getElementById(`pa-${m.id}`);
+        const amt = parseFloat(inp?.value || 0);
+        if (amt > 0) parts.push({ participant: m.id, montant_part: amt.toFixed(2) });
+    });
+
+    if (!parts.length) return showError('Sélectionnez au moins un participant.');
+
+    const totalParts = parts.reduce((s, p) => s + parseFloat(p.montant_part), 0);
+    if (Math.abs(totalParts - montant) > 0.01) {
+        return showError(`La somme des parts (${fmt(totalParts)} €) doit être égale au montant (${fmt(montant)} €).`);
+    }
+
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.textContent = 'Enregistrement…';
+
+    const res = await fetch('/api/depenses/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+        body: JSON.stringify({ groupe: groupeId, titre, montant: montant.toFixed(2), payeur: payeurId, parts }),
+    });
+
+    if (res.ok) {
+        window.location.href = '/dashboard/';
+    } else {
+        const err = await res.json();
+        const msg = typeof err === 'object' ? Object.values(err).flat().join(' — ') : JSON.stringify(err);
+        showError(msg);
+        btn.disabled = false;
+        btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Enregistrer la dépense`;
+    }
+}
+
+init();
+</script>
+</body>
+</html>
