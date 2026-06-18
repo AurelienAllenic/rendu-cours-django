@@ -474,6 +474,25 @@ class GestionMembresAPITest(TestCase):
         self.assertEqual(resp.status_code, 400)
         self.assertTrue(self.groupe.membres.filter(pk=self.bob.pk).exists())
 
+    # ── search_users (autocomplétion) ─────────────────────────────────────────
+
+    def test_recherche_utilisateurs_exclut_les_membres(self):
+        """L'autocomplétion ne propose pas les membres déjà dans le groupe."""
+        resp = self.client.get(self._url("search_users"), {"q": "b"})
+        self.assertEqual(resp.status_code, 200)
+        usernames = [u["username"] for u in resp.json()]
+        self.assertIn("bob", usernames)        # bob n'est pas encore membre
+        self.assertNotIn("alice", usernames)   # alice est membre → exclue
+
+    def test_recherche_apres_ajout_exclut_le_nouveau_membre(self):
+        self.groupe.membres.add(self.bob)
+        resp = self.client.get(self._url("search_users"), {"q": "b"})
+        self.assertNotIn("bob", [u["username"] for u in resp.json()])
+
+    def test_recherche_vide_renvoie_liste_vide(self):
+        resp = self.client.get(self._url("search_users"), {"q": "  "})
+        self.assertEqual(resp.json(), [])
+
     # ── permissions ──────────────────────────────────────────────────────────
 
     def test_non_membre_ne_voit_pas_le_groupe(self):

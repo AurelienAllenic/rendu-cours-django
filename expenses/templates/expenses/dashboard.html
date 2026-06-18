@@ -576,16 +576,40 @@
         }
         .mem-rm:hover { background: var(--neg-s); color: var(--neg); border-color: rgba(255,77,109,0.25); }
         .mem-add { display: flex; gap: 8px; margin-top: 16px; }
-        .mem-add input {
-            flex: 1;
+        .mem-ac { position: relative; flex: 1; }
+        .mem-ac input {
+            width: 100%;
             background: var(--s2); border: 1px solid var(--border2);
             border-radius: 10px; padding: 12px 15px;
             font-size: 14px; font-family: 'Outfit', sans-serif;
             color: var(--text); outline: none;
             transition: border-color 0.15s, box-shadow 0.15s;
         }
-        .mem-add input::placeholder { color: var(--dim); }
-        .mem-add input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-s); }
+        .mem-ac input::placeholder { color: var(--dim); }
+        .mem-ac input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-s); }
+        .mem-suggest {
+            display: none;
+            position: absolute;
+            bottom: calc(100% + 6px);
+            left: 0; right: 0;
+            background: var(--s2);
+            border: 1px solid var(--border2);
+            border-radius: 10px;
+            overflow-y: auto;
+            max-height: 220px;
+            z-index: 10;
+            box-shadow: 0 -12px 32px rgba(0,0,0,0.5);
+        }
+        .mem-suggest.open { display: block; }
+        .mem-suggest-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 9px 12px;
+            cursor: pointer;
+            font-size: 13.5px; color: var(--text);
+            transition: background 0.1s;
+        }
+        .mem-suggest-item:hover, .mem-suggest-item.active { background: var(--s3); }
+        .mem-suggest-empty { padding: 11px 12px; font-size: 12.5px; color: var(--dim); }
         .mem-add button {
             flex: none; padding: 0 18px;
             background: var(--accent); border: none;
@@ -796,7 +820,10 @@
         <div class="modal-err" id="mem-err"></div>
         <div class="mem-list" id="mem-list"></div>
         <div class="mem-add">
-            <input type="text" id="mem-username" placeholder="nom d'utilisateur à ajouter" autocomplete="off">
+            <div class="mem-ac">
+                <input type="text" id="mem-username" placeholder="nom d'utilisateur à ajouter" autocomplete="off">
+                <div class="mem-suggest" id="mem-suggest"></div>
+            </div>
             <button onclick="addMember()" title="Ajouter">+</button>
         </div>
         <div class="modal-btns">
@@ -998,6 +1025,54 @@ function closeMemModal() {
     document.getElementById('mem-overlay').classList.remove('open');
     document.getElementById('mem-username').value = '';
     document.getElementById('mem-err').style.display = 'none';
+    closeMemSuggest();
+}
+
+// ─── Autocomplétion des utilisateurs ─────────────────────────────────────────
+
+let memAcTimer = null, memAcItems = [], memAcIndex = -1;
+
+function onMemInput() {
+    clearTimeout(memAcTimer);
+    const q = document.getElementById('mem-username').value.trim();
+    if (!q) { closeMemSuggest(); return; }
+    memAcTimer = setTimeout(() => fetchMemSuggest(q), 180);
+}
+
+async function fetchMemSuggest(q) {
+    const data = await api(`/api/groupes/${curGroup.id}/search_users/?q=${encodeURIComponent(q)}`);
+    memAcItems = Array.isArray(data) ? data : [];
+    memAcIndex = -1;
+    renderMemSuggest();
+}
+
+function renderMemSuggest() {
+    const el = document.getElementById('mem-suggest');
+    if (!memAcItems.length) {
+        el.innerHTML = '<div class="mem-suggest-empty">Aucun utilisateur disponible.</div>';
+        el.classList.add('open');
+        return;
+    }
+    el.innerHTML = memAcItems.map((u, i) => `
+        <div class="mem-suggest-item${i === memAcIndex ? ' active' : ''}" onmousedown="pickMemSuggest(${i})">
+            <div class="mem-av" style="width:24px;height:24px;font-size:11px;background:${hue(u.username)};color:#09090d">${u.username[0].toUpperCase()}</div>
+            <span>${u.username}</span>
+        </div>`).join('');
+    el.classList.add('open');
+}
+
+function pickMemSuggest(i) {
+    const u = memAcItems[i];
+    if (!u) return;
+    document.getElementById('mem-username').value = u.username;
+    closeMemSuggest();
+    addMember();
+}
+
+function closeMemSuggest() {
+    document.getElementById('mem-suggest').classList.remove('open');
+    memAcItems = [];
+    memAcIndex = -1;
 }
 
 function renderMemList() {
@@ -1030,6 +1105,7 @@ async function memAction(endpoint, username) {
         const id = curGroup.id;
         await selectGroup(id);   // recharge curGroup, soldes, dépenses
         renderMemList();
+        closeMemSuggest();
         err.style.display = 'none';
         return true;
     }
@@ -1064,7 +1140,21 @@ document.addEventListener('click', e => {
 });
 
 document.getElementById('m-nom').addEventListener('keydown', e=>{ if(e.key==='Enter') createGroup(); });
-document.getElementById('mem-username').addEventListener('keydown', e=>{ if(e.key==='Enter') addMember(); });
+document.getElementById('mem-username').addEventListener('input', onMemInput);
+document.getElementById('mem-username').addEventListener('blur', ()=>setTimeout(closeMemSuggest, 120));
+document.getElementById('mem-username').addEventListener('keydown', e=>{
+    const open = document.getElementById('mem-suggest').classList.contains('open') && memAcItems.length;
+    if (e.key==='ArrowDown' && open) {
+        e.preventDefault(); memAcIndex=(memAcIndex+1)%memAcItems.length; renderMemSuggest();
+    } else if (e.key==='ArrowUp' && open) {
+        e.preventDefault(); memAcIndex=(memAcIndex-1+memAcItems.length)%memAcItems.length; renderMemSuggest();
+    } else if (e.key==='Enter') {
+        if (open && memAcIndex>=0) { e.preventDefault(); pickMemSuggest(memAcIndex); }
+        else addMember();
+    } else if (e.key==='Escape') {
+        closeMemSuggest();
+    }
+});
 setCurrency(cur);
 init();
 </script>

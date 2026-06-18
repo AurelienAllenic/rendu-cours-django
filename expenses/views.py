@@ -50,6 +50,26 @@ class GroupeViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
+    @action(detail=True, methods=['get'])
+    def search_users(self, request, pk=None):
+        """
+        Autocomplétion : renvoie les utilisateurs dont le username contient `q`,
+        en excluant ceux déjà membres du groupe. Limité à 8 résultats.
+        """
+        groupe = self.get_object()
+        q = (request.query_params.get('q') or '').strip()
+        if not q:
+            return Response([])
+
+        utilisateurs = (
+            User.objects.filter(username__icontains=q)
+            .exclude(groupes=groupe)
+            .order_by('username')[:8]
+        )
+        return Response(
+            [{'id': u.id, 'username': u.username} for u in utilisateurs]
+        )
+
     @action(detail=True, methods=['post'])
     def add_member(self, request, pk=None):
         """Ajoute un membre au groupe via son nom d'utilisateur."""
