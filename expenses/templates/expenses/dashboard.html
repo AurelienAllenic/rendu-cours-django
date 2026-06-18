@@ -527,6 +527,74 @@
         }
         .btn-accent:hover { opacity: 0.88; }
 
+        /* ─── Members management ─── */
+        .members-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: auto;
+            padding-top: 18px;
+            border-top: 1px solid var(--border);
+        }
+        .mem-list { display: flex; flex-direction: column; gap: 8px; max-height: 280px; overflow-y: auto; }
+        .mem-row {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            background: var(--s2);
+            border: 1px solid var(--border2);
+            border-radius: 10px;
+            padding: 9px 12px;
+        }
+        .mem-av {
+            width: 30px; height: 30px;
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px; font-weight: 700;
+            flex-shrink: 0;
+        }
+        .mem-name { flex: 1; font-size: 13.5px; font-weight: 500; color: var(--text); }
+        .mem-tag {
+            font-size: 9.5px; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.5px;
+            color: var(--accent);
+            background: var(--accent-s);
+            border: 1px solid var(--accent-b);
+            padding: 2px 7px; border-radius: 5px;
+        }
+        .mem-rm {
+            width: 26px; height: 26px;
+            border-radius: 7px;
+            border: 1px solid var(--border2);
+            background: transparent;
+            color: var(--mid);
+            font-size: 13px;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            transition: background 0.15s, color 0.15s, border-color 0.15s;
+        }
+        .mem-rm:hover { background: var(--neg-s); color: var(--neg); border-color: rgba(255,77,109,0.25); }
+        .mem-add { display: flex; gap: 8px; margin-top: 16px; }
+        .mem-add input {
+            flex: 1;
+            background: var(--s2); border: 1px solid var(--border2);
+            border-radius: 10px; padding: 12px 15px;
+            font-size: 14px; font-family: 'Outfit', sans-serif;
+            color: var(--text); outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        .mem-add input::placeholder { color: var(--dim); }
+        .mem-add input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-s); }
+        .mem-add button {
+            flex: none; padding: 0 18px;
+            background: var(--accent); border: none;
+            border-radius: 10px; font-size: 18px; font-weight: 700;
+            color: var(--bg); cursor: pointer;
+            transition: opacity 0.12s;
+        }
+        .mem-add button:hover { opacity: 0.88; }
+
         /* ─── Scrollbar ─── */
         ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
@@ -654,7 +722,14 @@
                     <span class="balance-currency cur-sym">€</span>
                 </div>
                 <div class="balance-sub" id="bal-sub">Sélectionnez un groupe</div>
-                <div class="members-row" id="members-row">
+                <div class="members-head">
+                    <span class="card-eyebrow" style="margin:0">Membres</span>
+                    <button class="card-link" onclick="openMemModal()" style="background:none;border:none;cursor:pointer;font-family:'Outfit',sans-serif;display:flex;align-items:center;gap:5px;">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="16" y1="11" x2="22" y2="11"/></svg>
+                        Gérer
+                    </button>
+                </div>
+                <div class="members-row" id="members-row" style="margin-top:0;padding-top:14px;border-top:none;">
                     <div style="color:var(--dim);font-size:13px;">Aucun membre à afficher.</div>
                 </div>
             </div>
@@ -710,6 +785,22 @@
         <div class="modal-btns">
             <button class="btn-ghost" onclick="closeModal()">Annuler</button>
             <button class="btn-accent" onclick="createGroup()">Créer →</button>
+        </div>
+    </div>
+</div>
+
+<!-- Members modal -->
+<div class="overlay" id="mem-overlay" onclick="closeMemModal()">
+    <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-title" id="mem-modal-title">Membres du groupe</div>
+        <div class="modal-err" id="mem-err"></div>
+        <div class="mem-list" id="mem-list"></div>
+        <div class="mem-add">
+            <input type="text" id="mem-username" placeholder="nom d'utilisateur à ajouter" autocomplete="off">
+            <button onclick="addMember()" title="Ajouter">+</button>
+        </div>
+        <div class="modal-btns">
+            <button class="btn-ghost" onclick="closeMemModal()">Fermer</button>
         </div>
     </div>
 </div>
@@ -892,6 +983,74 @@ async function createGroup() {
     }
 }
 
+// ─── Gestion des membres ─────────────────────────────────────────────────────
+
+function openMemModal() {
+    if (!curGroup) return;
+    document.getElementById('mem-modal-title').textContent = `Membres · ${curGroup.nom}`;
+    renderMemList();
+    document.getElementById('mem-err').style.display = 'none';
+    document.getElementById('mem-overlay').classList.add('open');
+    setTimeout(()=>document.getElementById('mem-username').focus(), 50);
+}
+
+function closeMemModal() {
+    document.getElementById('mem-overlay').classList.remove('open');
+    document.getElementById('mem-username').value = '';
+    document.getElementById('mem-err').style.display = 'none';
+}
+
+function renderMemList() {
+    const el = document.getElementById('mem-list');
+    const members = curGroup.membres_detail || [];
+    el.innerHTML = members.map(m => {
+        const isCreator = m.username === curGroup.createur;
+        const isMe = m.id === ME.id;
+        const label = `${m.username}${isMe ? ' · vous' : ''}`;
+        const right = isCreator
+            ? '<span class="mem-tag">Créateur</span>'
+            : `<button class="mem-rm" onclick="removeMember('${m.username.replace(/'/g, "\\'")}')" title="Retirer du groupe">✕</button>`;
+        return `<div class="mem-row">
+            <div class="mem-av" style="background:${hue(m.username)};color:#09090d">${m.username[0].toUpperCase()}</div>
+            <span class="mem-name">${label}</span>
+            ${right}
+        </div>`;
+    }).join('');
+}
+
+async function memAction(endpoint, username) {
+    const err = document.getElementById('mem-err');
+    const r = await fetch(`/api/groupes/${curGroup.id}/${endpoint}/`, {
+        method: 'POST',
+        headers: {'X-CSRFToken': CSRF, 'Content-Type': 'application/json'},
+        body: JSON.stringify({username}),
+    });
+    const data = await r.json();
+    if (r.ok) {
+        const id = curGroup.id;
+        await selectGroup(id);   // recharge curGroup, soldes, dépenses
+        renderMemList();
+        err.style.display = 'none';
+        return true;
+    }
+    err.textContent = data.detail || Object.values(data).flat().join(' ');
+    err.style.display = 'block';
+    return false;
+}
+
+async function addMember() {
+    const input = document.getElementById('mem-username');
+    const username = input.value.trim();
+    const err = document.getElementById('mem-err');
+    if (!username) { err.textContent = "Entrez un nom d'utilisateur."; err.style.display = 'block'; return; }
+    if (await memAction('add_member', username)) input.value = '';
+}
+
+function removeMember(username) {
+    if (!confirm(`Retirer « ${username} » du groupe ?`)) return;
+    memAction('remove_member', username);
+}
+
 function toggleSettings(e) {
     e.stopPropagation();
     const open = document.getElementById('settings-panel').classList.toggle('open');
@@ -905,6 +1064,7 @@ document.addEventListener('click', e => {
 });
 
 document.getElementById('m-nom').addEventListener('keydown', e=>{ if(e.key==='Enter') createGroup(); });
+document.getElementById('mem-username').addEventListener('keydown', e=>{ if(e.key==='Enter') addMember(); });
 setCurrency(cur);
 init();
 </script>

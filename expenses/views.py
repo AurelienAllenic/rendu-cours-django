@@ -2,11 +2,13 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.shortcuts import redirect, render
-from rest_framework import viewsets
+from rest_framework import status, viewsets
+from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
-from .models import Depense, Groupe
+from .models import Depense, Groupe, Part
 from .permissions import IsGroupMember
 from .serializers import DepenseSerializer, GroupeSerializer
 
@@ -24,6 +26,86 @@ class GroupeViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         groupe = serializer.save(createur=self.request.user)
         groupe.membres.add(self.request.user)
+
+    @staticmethod
+    def _resoudre_utilisateur(request):
+        """
+        Extrait et valide le username transmis dans le corps de la requête.
+
+        Returns:
+            (user, None)          si l'utilisateur existe ;
+            (None, Response(...)) avec le code d'erreur adéquat sinon.
+        """
+        username = (request.data.get('username') or '').strip()
+        if not username:
+            return None, Response(
+                {'detail': "Le nom d'utilisateur est requis."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            return User.objects.get(username=username), None
+        except User.DoesNotExist:
+            return None, Response(
+                {'detail': f"Aucun utilisateur « {username} » n'existe."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+    @action(detail=True, methods=['post'])
+    def add_member(self, request, pk=None):
+        """Ajoute un membre au groupe via son nom d'utilisateur."""
+        groupe = self.get_object()
+        user, erreur = self._resoudre_utilisateur(request)
+        if erreur:
+            return erreur
+
+        if groupe.membres.filter(pk=user.pk).exists():
+            return Response(
+                {'detail': f"« {user.username} » est déjà membre du groupe."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        groupe.membres.add(user)
+        return Response(self.get_serializer(groupe).data)
+
+    @action(detail=True, methods=['post'])
+    def remove_member(self, request, pk=None):
+        """Retire un membre du groupe via son nom d'utilisateur."""
+        groupe = self.get_object()
+        user, erreur = self._resoudre_utilisateur(request)
+        if erreur:
+            return erreur
+
+        if user.pk == groupe.createur_id:
+            return Response(
+                {'detail': "Le créateur du groupe ne peut pas en être retiré."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not groupe.membres.filter(pk=user.pk).exists():
+            return Response(
+                {'detail': f"« {user.username} » n'est pas membre du groupe."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # On protège l'intégrité des soldes : impossible de retirer un membre
+        # déjà impliqué financièrement (en tant que payeur ou participant).
+        a_paye = Depense.objects.filter(groupe=groupe, payeur=user).exists()
+        a_une_part = Part.objects.filter(
+            depense__groupe=groupe, participant=user
+        ).exists()
+        if a_paye or a_une_part:
+            return Response(
+                {
+                    'detail': (
+                        f"« {user.username} » a des dépenses ou des parts dans "
+                        "ce groupe et ne peut pas être retiré."
+                    )
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        groupe.membres.remove(user)
+        return Response(self.get_serializer(groupe).data)
 
 
 class DepenseViewSet(viewsets.ModelViewSet):
