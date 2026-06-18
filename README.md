@@ -7,6 +7,7 @@ API REST de partage de dépenses entre amis, développée avec **Django 5.1** et
 ## Fonctionnalités
 
 - Création et gestion de **groupes** avec membres
+- **Ajout / retrait de membres** d'un groupe existant, avec **autocomplétion** des utilisateurs
 - Enregistrement de **dépenses** avec répartition personnalisée des parts
 - Calcul automatique des **soldes nets** par membre
 - Algorithme glouton de **minimisation des remboursements**
@@ -69,7 +70,29 @@ python manage.py migrate
 python manage.py createsuperuser
 ```
 
-### 6. Lancer le serveur de développement
+### 6. Charger les données de démo (optionnel)
+
+Une fixture prête à l'emploi crée **5 utilisateurs de test**, 2 groupes et plusieurs dépenses cohérentes :
+
+```bash
+python manage.py loaddata demo_data
+```
+
+Les 5 comptes utilisent tous le mot de passe **`password`** :
+
+| username | mot de passe |
+|---|---|
+| `alice` | `password` |
+| `bob` | `password` |
+| `charlie` | `password` |
+| `diana` | `password` |
+| `evan` | `password` |
+
+Tu peux ensuite te connecter sur `/login/` avec n'importe lequel de ces comptes.
+
+> **Notes** : les PK sont fixées à partir de `9001` pour éviter toute collision avec des données existantes — relancer `loaddata demo_data` réinitialise donc le jeu de démo (idempotent). Le fichier source est `expenses/fixtures/demo_data.json`.
+
+### 7. Lancer le serveur de développement
 
 ```bash
 python manage.py runserver
@@ -111,6 +134,11 @@ L'application dispose d'une interface web moderne accessible directement depuis 
 | `GET` | `/api/groupes/{id}/` | Détail d'un groupe |
 | `PUT` | `/api/groupes/{id}/` | Modifier un groupe |
 | `DELETE` | `/api/groupes/{id}/` | Supprimer un groupe |
+| `GET` | `/api/groupes/{id}/search_users/?q=<texte>` | Autocomplétion : utilisateurs non-membres correspondant à `q` (max 8) |
+| `POST` | `/api/groupes/{id}/add_member/` | Ajouter un membre via `{"username": "..."}` |
+| `POST` | `/api/groupes/{id}/remove_member/` | Retirer un membre via `{"username": "..."}` |
+
+> **Gestion des membres** : le créateur ne peut pas être retiré, et un membre déjà impliqué financièrement (payeur ou détenteur d'une part) est protégé contre le retrait pour préserver l'intégrité des soldes. La gestion se fait aussi depuis le dashboard via le bouton **« Gérer »**.
 
 ### Dépenses
 
@@ -199,12 +227,13 @@ python manage.py test expenses.tests --verbosity=2
 python manage.py test expenses.tests.ScenarioComplexeTest
 ```
 
-**21 tests** couvrant :
+**32 tests** couvrant :
 - Dépense unique équitable
 - Équilibre parfait (0 remboursement)
 - Scénario complexe multi-dépenses (minimisation des transactions)
 - Membre inactif (solde nul, absent des virements)
 - Appel du service par instance ou par ID entier
+- API de gestion des membres (ajout, retrait, protections, permissions, autocomplétion)
 
 ---
 
@@ -231,6 +260,8 @@ rendu-django/
     ├── urls.py                 # Routeur DRF
     ├── admin.py                # Interface d'administration
     ├── tests.py                # Suite de tests unitaires
+    ├── fixtures/
+    │   └── demo_data.json      # Données de démo (5 users, groupes, dépenses)
     └── templates/
         └── expenses/
             ├── login.html      # Page connexion / inscription

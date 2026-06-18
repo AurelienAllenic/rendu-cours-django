@@ -1,0 +1,232 @@
+[
+  {
+    "model": "auth.user",
+    "pk": 9001,
+    "fields": {
+      "username": "alice",
+      "first_name": "Alice",
+      "email": "alice@example.com",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "password": "pbkdf2_sha256$870000$JUgLZSFw1ojTYjBVeFnIcw$JO8Ypq+9oeLF5nLIU/UCv+/gH5vl2sSnsiV+Gp0M39Y="
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 9002,
+    "fields": {
+      "username": "bob",
+      "first_name": "Bob",
+      "email": "bob@example.com",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "password": "pbkdf2_sha256$870000$JUgLZSFw1ojTYjBVeFnIcw$JO8Ypq+9oeLF5nLIU/UCv+/gH5vl2sSnsiV+Gp0M39Y="
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 9003,
+    "fields": {
+      "username": "charlie",
+      "first_name": "Charlie",
+      "email": "charlie@example.com",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "password": "pbkdf2_sha256$870000$JUgLZSFw1ojTYjBVeFnIcw$JO8Ypq+9oeLF5nLIU/UCv+/gH5vl2sSnsiV+Gp0M39Y="
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 9004,
+    "fields": {
+      "username": "diana",
+      "first_name": "Diana",
+      "email": "diana@example.com",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "password": "pbkdf2_sha256$870000$JUgLZSFw1ojTYjBVeFnIcw$JO8Ypq+9oeLF5nLIU/UCv+/gH5vl2sSnsiV+Gp0M39Y="
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 9005,
+    "fields": {
+      "username": "evan",
+      "first_name": "Evan",
+      "email": "evan@example.com",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "password": "pbkdf2_sha256$870000$JUgLZSFw1ojTYjBVeFnIcw$JO8Ypq+9oeLF5nLIU/UCv+/gH5vl2sSnsiV+Gp0M39Y="
+    }
+  },
+
+  {
+    "model": "expenses.groupe",
+    "pk": 9001,
+    "fields": {
+      "nom": "Vacances Été",
+      "description": "Maison louée pour une semaine entre amis.",
+      "date_creation": "2026-06-01T10:00:00Z",
+      "createur": 9001,
+      "membres": [9001, 9002, 9003, 9004]
+    }
+  },
+  {
+    "model": "expenses.groupe",
+    "pk": 9002,
+    "fields": {
+      "nom": "Coloc",
+      "description": "Charges partagées de l'appartement.",
+      "date_creation": "2026-06-02T10:00:00Z",
+      "createur": 9002,
+      "membres": [9002, 9003, 9005]
+    }
+  },
+
+  {
+    "model": "expenses.depense",
+    "pk": 9001,
+    "fields": {
+      "groupe": 9001,
+      "titre": "Location villa",
+      "montant": "600.00",
+      "date_creation": "2026-06-03T09:00:00Z",
+      "payeur": 9001
+    }
+  },
+  {
+    "model": "expenses.depense",
+    "pk": 9002,
+    "fields": {
+      "groupe": 9001,
+      "titre": "Courses",
+      "montant": "80.00",
+      "date_creation": "2026-06-04T09:00:00Z",
+      "payeur": 9002
+    }
+  },
+  {
+    "model": "expenses.depense",
+    "pk": 9003,
+    "fields": {
+      "groupe": 9001,
+      "titre": "Essence",
+      "montant": "60.00",
+      "date_creation": "2026-06-05T09:00:00Z",
+      "payeur": 9003
+    }
+  },
+  {
+    "model": "expenses.depense",
+    "pk": 9004,
+    "fields": {
+      "groupe": 9002,
+      "titre": "Loyer",
+      "montant": "900.00",
+      "date_creation": "2026-06-06T09:00:00Z",
+      "payeur": 9002
+    }
+  },
+  {
+    "model": "expenses.depense",
+    "pk": 9005,
+    "fields": {
+      "groupe": 9002,
+      "titre": "Internet",
+      "montant": "30.00",
+      "date_creation": "2026-06-07T09:00:00Z",
+      "payeur": 9005
+    }
+  },
+
+  {
+    "model": "expenses.part",
+    "pk": 9001,
+    "fields": { "depense": 9001, "participant": 9001, "montant_part": "150.00" }
+  },
+  {
+    "model": "expenses.part",
+    "pk": 9002,
+    "fields": { "depense": 9001, "participant": 9002, "montant_part": "150.00" }
+  },
+  {
+    "model": "expenses.part",
+    "pk": 9003,
+    "fields": { "depense": 9001, "participant": 9003, "montant_part": "150.00" }
+  },
+  {
+    "model": "expenses.part",
+    "pk": 9004,
+    "fields": { "depense": 9001, "participant": 9004, "montant_part": "150.00" }
+  },
+  {
+    "model": "expenses.part",
+    "pk": 9005,
+    "fields": { "depense": 9002, "participant": 9001, "montant_part": "20.00" }
+  },
+  {
+    "model": "expenses.part",
+    "pk": 9006,
+    "fields": { "depense": 9002, "participant": 9002, "montant_part": "20.00" }
+  },
+  {
+    "model": "expenses.part",
+    "pk": 9007,
+    "fields": { "depense": 9002, "participant": 9003, "montant_part": "20.00" }
+  },
+  {
+    "model": "expenses.part",
+    "pk": 9008,
+    "fields": { "depense": 9002, "participant": 9004, "montant_part": "20.00" }
+  },
+  {
+    "model": "expenses.part",
+    "pk": 9009,
+    "fields": { "depense": 9003, "participant": 9001, "montant_part": "20.00" }
+  },
+  {
+    "model": "expenses.part",
+    "pk": 9010,
+    "fields": { "depense": 9003, "participant": 9002, "montant_part": "20.00" }
+  },
+  {
+    "model": "expenses.part",
+    "pk": 9011,
+    "fields": { "depense": 9003, "participant": 9003, "montant_part": "20.00" }
+  },
+  {
+    "model": "expenses.part",
+    "pk": 9012,
+    "fields": { "depense": 9004, "participant": 9002, "montant_part": "300.00" }
+  },
+  {
+    "model": "expenses.part",
+    "pk": 9013,
+    "fields": { "depense": 9004, "participant": 9003, "montant_part": "300.00" }
+  },
+  {
+    "model": "expenses.part",
+    "pk": 9014,
+    "fields": { "depense": 9004, "participant": 9005, "montant_part": "300.00" }
+  },
+  {
+    "model": "expenses.part",
+    "pk": 9015,
+    "fields": { "depense": 9005, "participant": 9002, "montant_part": "10.00" }
+  },
+  {
+    "model": "expenses.part",
+    "pk": 9016,
+    "fields": { "depense": 9005, "participant": 9003, "montant_part": "10.00" }
+  },
+  {
+    "model": "expenses.part",
+    "pk": 9017,
+    "fields": { "depense": 9005, "participant": 9005, "montant_part": "10.00" }
+  }
+]
