@@ -8,11 +8,15 @@ from .models import Depense, Groupe, Part
 class GroupeSerializer(serializers.ModelSerializer):
     createur = serializers.StringRelatedField(read_only=True)
     membres = serializers.StringRelatedField(many=True, read_only=True)
+    membres_detail = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Groupe
-        fields = ['id', 'nom', 'description', 'date_creation', 'createur', 'membres']
-        read_only_fields = ['id', 'date_creation', 'createur', 'membres']
+        fields = ['id', 'nom', 'description', 'date_creation', 'createur', 'membres', 'membres_detail']
+        read_only_fields = ['id', 'date_creation', 'createur', 'membres', 'membres_detail']
+
+    def get_membres_detail(self, obj):
+        return [{'id': m.id, 'username': m.username} for m in obj.membres.all()]
 
 
 class PartSerializer(serializers.ModelSerializer):

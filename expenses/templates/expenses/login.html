@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tricount — Connexion</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;0,9..144,900;1,9..144,400;1,9..144,700;1,9..144,900&family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg:       #09090d;
+            --s1:       #111218;
+            --s2:       #181a22;
+            --border:   #22242e;
+            --border2:  #2d3040;
+            --accent:   #b5f23d;
+            --accent-s: rgba(181,242,61,0.08);
+            --text:     #eceef0;
+            --mid:      #686c80;
+            --dim:      #3a3d50;
+            --neg:      #ff4d6d;
+            --neg-s:    rgba(255,77,109,0.1);
+        }
+
+        html, body { height: 100%; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow: hidden;
+        }
+
+        /* ─── Grain overlay ─── */
+        body::before {
+            content: '';
+            position: fixed; inset: 0; z-index: 9999; pointer-events: none;
+            opacity: 0.045;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-size: 160px;
+        }
+
+        /* ─── Layout ─── */
+        .shell {
+            display: grid;
+            grid-template-columns: 46% 54%;
+            height: 100vh;
+        }
+
+        /* ─── Brand panel ─── */
+        .brand {
+            background: var(--s1);
+            border-right: 1px solid var(--border);
+            padding: 48px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Decorative large glyph */
+        .brand::after {
+            content: '€';
+            position: absolute;
+            right: -40px; bottom: -60px;
+            font-family: 'Fraunces', serif;
+            font-size: clamp(220px, 25vw, 340px);
+            font-weight: 900;
+            color: var(--accent);
+            opacity: 0.04;
+            line-height: 1;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            position: relative;
+            z-index: 1;
+        }
+        .logo-badge {
+            background: var(--accent);
+            color: var(--bg);
+            font-family: 'Outfit', sans-serif;
+            font-size: 12.5px;
+            font-weight: 700;
+            padding: 5px 10px;
+            border-radius: 8px;
+            letter-spacing: -0.3px;
+        }
+        .logo-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text);
+            opacity: 0.9;
+        }
+
+        .brand-quote {
+            margin: auto 0;
+            font-family: 'Fraunces', serif;
+            font-size: clamp(26px, 2.8vw, 42px);
+            font-weight: 700;
+            line-height: 1.18;
+            letter-spacing: -0.8px;
+            position: relative;
+            z-index: 1;
+            max-width: 380px;
+        }
+        .brand-quote em {
+            font-style: italic;
+            color: var(--accent);
+        }
+
+        .brand-stats {
+            display: flex;
+            gap: 36px;
+            position: relative;
+            z-index: 1;
+            padding-top: 32px;
+            border-top: 1px solid var(--border);
+        }
+        .stat-num {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 21px;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        .stat-lbl {
+            display: block;
+            font-size: 10.5px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.9px;
+            color: var(--dim);
+            margin-top: 4px;
+        }
+
+        /* ─── Form panel ─── */
+        .form-side {
+            background: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 48px 52px;
+            overflow-y: auto;
+        }
+
+        .form-box {
+            width: 100%;
+            max-width: 360px;
+            animation: riseIn 0.55s cubic-bezier(0.16,1,0.3,1) both;
+        }
+
+        @keyframes riseIn {
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .mobile-logo { display: none; }
+
+        .form-title {
+            font-family: 'Fraunces', serif;
+            font-size: 38px;
+            font-weight: 700;
+            letter-spacing: -1px;
+            color: var(--text);
+            line-height: 1.05;
+            margin-bottom: 6px;
+        }
+        .form-sub {
+            font-size: 14px;
+            color: var(--mid);
+            margin-bottom: 32px;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 28px;
+            gap: 2px;
+        }
+        .tab {
+            flex: 1;
+            padding: 10px 0;
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 13.5px;
+            font-weight: 500;
+            color: var(--dim);
+            cursor: pointer;
+            transition: color 0.15s, border-color 0.15s;
+            text-align: center;
+            letter-spacing: 0.1px;
+        }
+        .tab:hover:not(.active) { color: var(--mid); }
+        .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+        /* Alert */
+        .alert {
+            display: flex; align-items: center; gap: 10px;
+            background: var(--neg-s);
+            border: 1px solid rgba(255,77,109,0.22);
+            border-radius: 10px;
+            padding: 11px 15px;
+            color: var(--neg);
+            font-size: 13.5px;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+        .alert svg { flex-shrink: 0; }
+
+        /* Panels */
+        .panel { display: none; }
+        .panel.active { display: block; }
+
+        /* Fields */
+        .field { margin-bottom: 15px; }
+        .field label {
+            display: block;
+            font-size: 10.5px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--mid);
+            margin-bottom: 8px;
+        }
+        .optional { text-transform: none; font-weight: 400; letter-spacing: 0; font-size: 11px; color: var(--dim); }
+
+        input[type=text], input[type=password], input[type=email] {
+            width: 100%;
+            background: var(--s1);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 13px 16px;
+            font-size: 14.5px;
+            font-family: 'Outfit', sans-serif;
+            color: var(--text);
+            outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+        }
+        input::placeholder { color: var(--dim); }
+        input:hover { border-color: var(--border2); }
+        input:focus {
+            border-color: var(--accent);
+            background: #111318;
+            box-shadow: 0 0 0 3px var(--accent-s);
+        }
+
+        .btn-submit {
+            width: 100%; margin-top: 10px;
+            padding: 14px;
+            background: var(--accent);
+            color: #0a0b0e;
+            border: none;
+            border-radius: 11px;
+            font-size: 15px;
+            font-weight: 700;
+            font-family: 'Outfit', sans-serif;
+            cursor: pointer;
+            letter-spacing: -0.2px;
+            transition: opacity 0.12s, transform 0.1s;
+        }
+        .btn-submit:hover { opacity: 0.88; transform: translateY(-1px); }
+        .btn-submit:active { opacity: 1; transform: none; }
+
+        /* ─── Responsive ─── */
+        @media (max-width: 820px) {
+            html, body { overflow: auto; }
+            body { overflow-x: hidden; }
+            .shell { grid-template-columns: 1fr; height: auto; min-height: 100vh; overflow: auto; }
+            .brand { display: none; }
+            .form-side { padding: 48px 24px; align-items: flex-start; min-height: 100vh; }
+            .form-box { max-width: 100%; }
+            .mobile-logo {
+                display: flex; align-items: center; gap: 11px;
+                margin-bottom: 36px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .form-side { padding: 32px 20px; }
+            .form-title { font-size: 30px; }
+        }
+    </style>
+</head>
+<body>
+<div class="shell">
+
+    <!-- Brand panel -->
+    <div class="brand">
+        <div class="logo">
+            <span class="logo-badge">T₂</span>
+            <span class="logo-name">Tricount</span>
+        </div>
+        <div class="brand-quote">
+            Partagez vos dépenses,<br>
+            <em>sans les<br>complications.</em>
+        </div>
+        <div class="brand-stats">
+            <div>
+                <span class="stat-num">3,4K</span>
+                <span class="stat-lbl">utilisateurs</span>
+            </div>
+            <div>
+                <span class="stat-num">142K€</span>
+                <span class="stat-lbl">remboursements calculés</span>
+            </div>
+            <div>
+                <span class="stat-num">∞</span>
+                <span class="stat-lbl">conflits évités</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form panel -->
+    <div class="form-side">
+        <div class="form-box">
+
+            <div class="mobile-logo">
+                <span class="logo-badge">T₂</span>
+                <span class="logo-name">Tricount</span>
+            </div>
+
+            <h1 class="form-title">Bienvenue.</h1>
+            <p class="form-sub">Connectez-vous ou créez un compte pour commencer.</p>
+
+            <div class="tabs">
+                <button class="tab {% if active_tab == 'login' %}active{% endif %}" onclick="switchTab('login')">Se connecter</button>
+                <button class="tab {% if active_tab == 'register' %}active{% endif %}" onclick="switchTab('register')">S'inscrire</button>
+            </div>
+
+            {% if error %}
+            <div class="alert">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                {{ error }}
+            </div>
+            {% endif %}
+
+            <div id="panel-login" class="panel {% if active_tab == 'login' %}active{% endif %}">
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="login">
+                    <div class="field">
+                        <label>Nom d'utilisateur</label>
+                        <input type="text" name="username" placeholder="votre_pseudo" autocomplete="username" autofocus>
+                    </div>
+                    <div class="field">
+                        <label>Mot de passe</label>
+                        <input type="password" name="password" placeholder="••••••••" autocomplete="current-password">
+                    </div>
+                    <button type="submit" class="btn-submit">Connexion →</button>
+                </form>
+            </div>
+
+            <div id="panel-register" class="panel {% if active_tab == 'register' %}active{% endif %}">
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="register">
+                    <div class="field">
+                        <label>Nom d'utilisateur</label>
+                        <input type="text" name="username" placeholder="votre_pseudo" autocomplete="username">
+                    </div>
+                    <div class="field">
+                        <label>Email <span class="optional">— optionnel</span></label>
+                        <input type="email" name="email" placeholder="vous@email.com" autocomplete="email">
+                    </div>
+                    <div class="field">
+                        <label>Mot de passe <span class="optional">— min. 8 caractères</span></label>
+                        <input type="password" name="password" placeholder="••••••••" autocomplete="new-password">
+                    </div>
+                    <div class="field">
+                        <label>Confirmer le mot de passe</label>
+                        <input type="password" name="password2" placeholder="••••••••" autocomplete="new-password">
+                    </div>
+                    <button type="submit" class="btn-submit">Créer mon compte →</button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+function switchTab(t) {
+    document.querySelectorAll('.tab').forEach((b,i) =>
+        b.classList.toggle('active', (t==='login'&&i===0)||(t==='register'&&i===1))
+    );
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-'+t).classList.add('active');
+}
+</script>
+</body>
+</html>
