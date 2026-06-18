@@ -371,3 +371,117 @@ class AppelParIdTest(CalculSoldesTestCase):
         par_instance = calculer_soldes(self.groupe)
         par_id       = calculer_soldes(self.groupe.pk)
         self.assertEqual(par_instance, par_id)
+
+
+# ==============================================================================
+# Test 6 — API : gestion des membres d'un groupe
+# ==============================================================================
+
+class GestionMembresAPITest(TestCase):
+    """
+    Vérifie les actions add_member / remove_member du GroupeViewSet.
+
+    Scénario de base :
+        - alice est créatrice et membre du groupe ;
+        - bob et carol existent mais ne sont pas encore membres.
+    """
+
+    def setUp(self):
+        self.alice = User.objects.create_user("alice", password="pass")
+        self.bob   = User.objects.create_user("bob",   password="pass")
+        self.carol = User.objects.create_user("carol", password="pass")
+
+        self.groupe = Groupe.objects.create(nom="Coloc", createur=self.alice)
+        self.groupe.membres.add(self.alice)
+
+        self.client.force_login(self.alice)
+
+    def _url(self, action):
+        return f"/api/groupes/{self.groupe.pk}/{action}/"
+
+    # ── add_member ───────────────────────────────────────────────────────────
+
+    def test_ajout_membre_par_username(self):
+        resp = self.client.post(
+            self._url("add_member"),
+            data={"username": "bob"},
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(self.groupe.membres.filter(pk=self.bob.pk).exists())
+
+    def test_ajout_username_inexistant_renvoie_404(self):
+        resp = self.client.post(
+            self._url("add_member"),
+            data={"username": "zoe"},
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 404)
+
+    def test_ajout_membre_deja_present_renvoie_400(self):
+        self.groupe.membres.add(self.bob)
+        resp = self.client.post(
+            self._url("add_member"),
+            data={"username": "bob"},
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 400)
+
+    def test_ajout_username_vide_renvoie_400(self):
+        resp = self.client.post(
+            self._url("add_member"),
+            data={"username": "  "},
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 400)
+
+    # ── remove_member ────────────────────────────────────────────────────────
+
+    def test_retrait_membre(self):
+        self.groupe.membres.add(self.bob)
+        resp = self.client.post(
+            self._url("remove_member"),
+            data={"username": "bob"},
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertFalse(self.groupe.membres.filter(pk=self.bob.pk).exists())
+
+    def test_retrait_createur_interdit(self):
+        resp = self.client.post(
+            self._url("remove_member"),
+            data={"username": "alice"},
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 400)
+        self.assertTrue(self.groupe.membres.filter(pk=self.alice.pk).exists())
+
+    def test_retrait_membre_avec_depense_interdit(self):
+        """Un membre payeur d'une dépense ne peut pas être retiré."""
+        self.groupe.membres.add(self.bob)
+        depense = Depense.objects.create(
+            groupe=self.groupe, titre="Courses",
+            montant=Decimal("10.00"), payeur=self.bob,
+        )
+        Part.objects.create(
+            depense=depense, participant=self.bob, montant_part=Decimal("10.00")
+        )
+        resp = self.client.post(
+            self._url("remove_member"),
+            data={"username": "bob"},
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 400)
+        self.assertTrue(self.groupe.membres.filter(pk=self.bob.pk).exists())
+
+    # ── permissions ──────────────────────────────────────────────────────────
+
+    def test_non_membre_ne_voit_pas_le_groupe(self):
+        """Un utilisateur non membre obtient 404 (groupe hors de son queryset)."""
+        self.client.force_login(self.carol)
+        resp = self.client.post(
+            self._url("add_member"),
+            data={"username": "bob"},
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 404)
